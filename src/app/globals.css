@@ -1,0 +1,217 @@
+@import "tailwindcss";
+
+/**
+ * Overwatch v1.0 - Flying Bird Dashboard
+ * Cyberpunk Terminal Aesthetic
+ * Primary: #020617 (Deep Black)
+ * Secondary: #1a1f2e (Dark Blue-Gray)
+ * Accent: #10b981 (Emerald Green)
+ * Matrix: #00ff41 (Neon Green - Legacy)
+ */
+
+:root {
+  --background: #020617;
+  --foreground: #ffffff;
+  --accent: #10b981;
+  --secondary: #1a1f2e;
+  --mono-primary: "JetBrains Mono", "SF Mono", "Monaco", "Courier New", monospace;
+}
+
+@layer base {
+  * {
+    @apply border-emerald-500/20;
+  }
+
+  html {
+    font-family: var(--mono-primary);
+  }
+
+  body {
+    @apply bg-gradient-to-br from-[#020617] via-[#0a0d17] to-[#020617] text-white font-mono;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-emerald-400 font-mono font-bold tracking-wider;
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    @apply w-2 h-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-[#0a0b10];
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[#00ff41]/30 hover:bg-[#00ff41]/50 rounded transition-colors;
+  }
+
+  /* Selection */
+  ::selection {
+    @apply bg-[#00ff41] text-[#0a0b10];
+  }
+}
+
+@layer components {
+  /* Glowing Text Effect */
+  .glow-text {
+    @apply text-[#00ff41] shadow-lg shadow-[#00ff41]/50 font-mono font-bold;
+  }
+
+  /* Card Hover Effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-[#00ff41]/30;
+  }
+
+  /* Terminal Effect */
+  .terminal {
+    @apply font-mono bg-[#0a0b10] border border-[#00ff41]/20 rounded;
+  }
+
+  /* Button Focus */
+  .focus-neon {
+    @apply focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50;
+  }
+
+  /* Matrix Data Display */
+  .matrix-text {
+    @apply font-mono text-[#00ff41] select-none;
+  }
+
+  /* Scan Container */
+  .scan-container {
+    @apply relative overflow-hidden;
+  }
+
+  .scan-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 255, 65, 0.03) 0px,
+      rgba(0, 255, 65, 0.03) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+}
+
+@layer utilities {
+  /* Cyber Gradient */
+  .cyber-gradient {
+    @apply bg-gradient-to-r from-[#00ff41] via-[#0a0b10] to-[#00ff41];
+  }
+
+  /* Neon Border */
+  .neon-border {
+    @apply border border-[#00ff41]/30 hover:border-[#00ff41] transition-colors duration-300;
+  }
+
+  /* Pulse Animation */
+  @keyframes pulse-neon {
+    0%, 100% {
+      opacity: 1;
+      text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41/50;
+    }
+    50% {
+      opacity: 0.8;
+      text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41/30;
+    }
+  }
+
+  .animate-pulse-neon {
+    animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  /* Scan Line Effect */
+  @keyframes scan-lines {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(10px);
+    }
+  }
+
+  .animate-scan-lines {
+    animation: scan-lines 8s linear infinite;
+  }
+
+  /* Glitch Effect */
+  @keyframes glitch {
+    0% {
+      clip-path: inset(40% 0 61% 0);
+      transform: translate(0);
+    }
+    20% {
+      clip-path: inset(92% 0 1% 0);
+      transform: translate(-2px, 2px);
+    }
+    40% {
+      clip-path: inset(43% 0 1% 0);
+      transform: translate(-2px, -2px);
+    }
+    60% {
+      clip-path: inset(25% 0 58% 0);
+      transform: translate(2px, -2px);
+    }
+    80% {
+      clip-path: inset(54% 0 7% 0);
+      transform: translate(2px, 2px);
+    }
+    100% {
+      clip-path: inset(58% 0 43% 0);
+      transform: translate(0);
+    }
+  }
+
+  .animate-glitch {
+    animation: glitch 0.8s infinite;
+  }
+
+  /* Matrix rain effect */
+  @keyframes matrix-rain {
+    0% {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    90% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100vh);
+      opacity: 0;
+    }
+  }
+
+  .animate-matrix-rain {
+    animation: matrix-rain 12s linear infinite;
+  }
+
+  /* Loading bar */
+  @keyframes loading-bar {
+    0% {
+      width: 0%;
+    }
+    50% {
+      width: 100%;
+    }
+    100% {
+      width: 0%;
+    }
+  }
+
+  .animate-loading-bar {
+    animation: loading-bar 2s ease-in-out infinite;
+  }
+}

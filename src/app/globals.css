@@ -44,39 +44,39 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-[#00ff41]/30 hover:bg-[#00ff41]/50 rounded transition-colors;
+    @apply bg-emerald-500/30 hover:bg-emerald-500/50 rounded transition-colors;
   }
 
   /* Selection */
   ::selection {
-    @apply bg-[#00ff41] text-[#0a0b10];
+    @apply bg-emerald-500 text-[#020617];
   }
 }
 
 @layer components {
   /* Glowing Text Effect */
   .glow-text {
-    @apply text-[#00ff41] shadow-lg shadow-[#00ff41]/50 font-mono font-bold;
+    @apply text-emerald-400 shadow-lg shadow-emerald-500/50 font-mono font-bold;
   }
 
   /* Card Hover Effect */
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:shadow-[#00ff41]/30;
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/30;
   }
 
   /* Terminal Effect */
   .terminal {
-    @apply font-mono bg-[#0a0b10] border border-[#00ff41]/20 rounded;
+    @apply font-mono bg-[#020617] border border-emerald-500/20 rounded;
   }
 
   /* Button Focus */
   .focus-neon {
-    @apply focus:outline-none focus:ring-2 focus:ring-[#00ff41]/50;
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500/50;
   }
 
-  /* Matrix Data Display */
-  .matrix-text {
-    @apply font-mono text-[#00ff41] select-none;
+  /* Cyberpunk Data Display */
+  .cyber-text {
+    @apply font-mono text-emerald-400 select-none;
   }
 
   /* Scan Container */
@@ -93,8 +93,8 @@
     height: 100%;
     background: repeating-linear-gradient(
       0deg,
-      rgba(0, 255, 65, 0.03) 0px,
-      rgba(0, 255, 65, 0.03) 1px,
+      rgba(16, 185, 129, 0.03) 0px,
+      rgba(16, 185, 129, 0.03) 1px,
       transparent 1px,
       transparent 3px
     );
@@ -106,23 +106,23 @@
 @layer utilities {
   /* Cyber Gradient */
   .cyber-gradient {
-    @apply bg-gradient-to-r from-[#00ff41] via-[#0a0b10] to-[#00ff41];
+    @apply bg-gradient-to-r from-emerald-500 via-[#020617] to-emerald-500;
   }
 
   /* Neon Border */
   .neon-border {
-    @apply border border-[#00ff41]/30 hover:border-[#00ff41] transition-colors duration-300;
+    @apply border border-emerald-500/30 hover:border-emerald-500 transition-colors duration-300;
   }
 
   /* Pulse Animation */
   @keyframes pulse-neon {
     0%, 100% {
       opacity: 1;
-      text-shadow: 0 0 10px #00ff41, 0 0 20px #00ff41/50;
+      text-shadow: 0 0 10px #10b981, 0 0 20px rgba(16, 185, 129, 0.5);
     }
     50% {
       opacity: 0.8;
-      text-shadow: 0 0 20px #00ff41, 0 0 40px #00ff41/30;
+      text-shadow: 0 0 20px #10b981, 0 0 40px rgba(16, 185, 129, 0.3);
     }
   }
 

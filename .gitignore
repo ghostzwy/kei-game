@@ -4,3 +4,8 @@ node_modules
 .DS_Store
 dist
 *.log
+firebase-admin-key.json
+firebase-admin-key.json
+.env.local
+firebase-admin-key.json
+firebase-admin-key.json

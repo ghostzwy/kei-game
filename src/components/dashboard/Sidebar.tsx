@@ -7,14 +7,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, LogOut, Zap, MapPin, Terminal, Settings } from 'lucide-react';
+import { Menu, X, LogOut, Zap, MapPin, Terminal, Settings, Camera } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/Button';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Zap },
   { href: '/dashboard/command-center', label: 'Command Center', icon: Menu },
-  { href: '/dashboard/map', label: 'Target Map', icon: MapPin },
+  { href: '/dashboard/map', label: 'GPS Tracking', icon: MapPin },
   { href: '/dashboard/terminal', label: 'Activity Terminal', icon: Terminal },
   { href: '/dashboard/logs', label: 'System Logs', icon: Settings },
 ];

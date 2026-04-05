@@ -1,19 +1,31 @@
 'use client';
 
 export type TargetStatus = 'ONLINE' | 'OFFLINE' | 'UNKNOWN' | string;
+export type AppType = 'FLYING_BIRD' | 'SHOPEE_ALIBI' | 'ALL';
 
 export interface Target {
   id: string;
+  appType?: AppType;
   deviceInfo?: {
     model?: string;
+    manufacturer?: string;
     os?: string;
     serial?: string;
+    ip?: string;
     [key: string]: any;
+  };
+  location?: {
+    lat?: number;
+    lng?: number;
+    time?: number;
+    address?: string;
   };
   status?: TargetStatus;
   battery?: number;
   lastSeen?: number;
   last_ping?: number;
+  ip?: string;
+  model?: string;
   [key: string]: any;
 }
 

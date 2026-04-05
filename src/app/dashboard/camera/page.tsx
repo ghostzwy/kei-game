@@ -19,17 +19,16 @@ export default function CameraPage() {
   const { images, isLoading } = useImageCaptures(selectedDeviceId ?? undefined);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Load targets on mount
+  // Load targets on mount - ONLY ONCE
   useEffect(() => {
     const unsubscribe = subscribeToTargets((incomingTargets: Target[] = []) => {
       setTargets(incomingTargets);
-      if (incomingTargets.length > 0 && !selectedDeviceId) {
-        setSelectedDeviceId(incomingTargets[0].id);
-      }
+      // Only set initial device ID if none selected and targets exist
+      setSelectedDeviceId((prev) => prev || (incomingTargets.length > 0 ? incomingTargets[0].id : null));
     });
 
     return () => unsubscribe();
-  }, [selectedDeviceId]);
+  }, []); // Empty dependency - mount only
 
   const currentDevice = targets.find((t) => t.id === selectedDeviceId);
 

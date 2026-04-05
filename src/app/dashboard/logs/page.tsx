@@ -5,12 +5,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { useSystemLogs } from '@/hooks/useFirebase';
 import { formatTimeAgo } from '@/lib/utils';
-import { Search, Filter, Download, Trash2 } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { SystemLog } from '@/types';
+
+const cn = (...inputs: Array<string | false | null | undefined>) => twMerge(clsx(inputs));
 
 export default function LogsPage() {
   const { logs, isLoading } = useSystemLogs(500);
@@ -18,130 +20,132 @@ export default function LogsPage() {
   const [filterType, setFilterType] = useState<SystemLog['type'] | 'all'>('all');
 
   const filteredLogs = logs.filter((log) => {
+    // Handle both string and object log formats
+    const messageText = typeof log === 'string' ? log : (log.message || '');
+    const deviceId = typeof log === 'object' ? (log.deviceId || log.device_id || '') : '';
+    
     const matchesSearch =
-      log.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.deviceId?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || log.type === filterType;
+      messageText.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deviceId.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const logType = typeof log === 'object' ? log.type : 'info';
+    const matchesType = filterType === 'all' || logType === filterType;
     return matchesSearch && matchesType;
   });
 
-  const getLogBgColor = (type: SystemLog['type']): string => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-900/10 border-green-600/30';
-      case 'error':
-        return 'bg-red-900/10 border-red-600/30';
-      case 'warning':
-        return 'bg-yellow-900/10 border-yellow-600/30';
-      case 'command':
-        return 'bg-blue-900/10 border-blue-600/30';
-      default:
-        return 'bg-[#0a0b10] border-[#00ff41]/20';
-    }
-  };
+  // Add key to force re-render when logs change
+  const logsKey = logs.map(l => (typeof l === 'string' ? l : l.id)).join(',');
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-4xl font-bold text-[#00ff41] mb-2">System Logs</h1>
-        <p className="text-gray-400">Comprehensive audit trail of all system activities</p>
-      </div>
+    <main key={logsKey} className="min-h-screen bg-slate-950 px-4 py-6 text-white">
+      <div className="mx-auto max-w-6xl space-y-6">
+        {/* Header */}
+        <section className="rounded-[32px] border border-white/10 bg-slate-950/85 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-rose-300/80">System Monitor</p>
+              <h1 className="mt-3 text-3xl font-semibold text-white">Live Activity Logs</h1>
+              <p className="mt-2 text-sm text-slate-400">Real-time feed dari Firebase system_logs</p>
+            </div>
+            <div className="grid gap-3 grid-cols-2">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Total Logs</p>
+                <p className="mt-2 text-2xl font-semibold text-rose-400">{logs.length}</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Filtered</p>
+                <p className="mt-2 text-2xl font-semibold text-cyan-400">{filteredLogs.length}</p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Log Filters</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Filters Section */}
+        <section className="rounded-[32px] border border-white/10 bg-slate-950/85 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
+          <h3 className="text-lg font-bold text-white mb-4">Filters</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search size={18} className="absolute left-3 top-2.5 text-gray-600" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
                 type="text"
                 placeholder="Search logs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 bg-[#0a0b10] border border-[#00ff41]/30 rounded text-white placeholder-gray-600 focus:border-[#00ff41] focus:outline-none"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-700 bg-slate-900/50 text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none transition"
               />
             </div>
 
             {/* Filter by Type */}
-            <div className="flex items-center gap-2">
-              <Filter size={18} className="text-gray-600" />
+            <div>
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value as any)}
-                className="flex-1 px-3 py-2 bg-[#0a0b10] border border-[#00ff41]/30 rounded text-white focus:border-[#00ff41] focus:outline-none"
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-700 bg-slate-900/50 text-white focus:border-cyan-400 focus:outline-none transition"
               >
                 <option value="all">All Types</option>
+                <option value="info">Info</option>
                 <option value="success">Success</option>
                 <option value="error">Error</option>
                 <option value="warning">Warning</option>
                 <option value="command">Command</option>
               </select>
             </div>
-
-            {/* Actions */}
-            <div className="flex gap-2">
-              <Button variant="secondary" size="sm" className="flex-1 flex items-center gap-2">
-                <Download size={16} />
-                Export
-              </Button>
-              <Button variant="destructive" size="sm" className="flex-1 flex items-center gap-2">
-                <Trash2 size={16} />
-                Clear
-              </Button>
-            </div>
           </div>
-        </CardContent>
-      </Card>
+        </section>
 
-      {/* Logs Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Logs ({filteredLogs.length})</CardTitle>
-          <CardDescription>
-            Total: {logs.length} events | Filtered: {filteredLogs.length}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2 max-h-96 overflow-y-auto">
+        {/* Logs Stream */}
+        <section className="rounded-[32px] border border-white/10 bg-slate-950/85 shadow-2xl shadow-slate-950/40 backdrop-blur-xl overflow-hidden">
+          <div className="max-h-[700px] overflow-y-auto">
             {isLoading ? (
-              <div className="text-center py-8 text-gray-400">Loading logs...</div>
+              <div className="p-8 text-center text-slate-500">Loading logs...</div>
             ) : filteredLogs.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">No logs found</div>
+              <div className="p-8 text-center text-slate-500">No logs found</div>
             ) : (
-              filteredLogs.map((log) => (
-                <div
-                  key={log.id}
-                  className={
-                    'p-3 border rounded flex justify-between items-start ' +
-                    getLogBgColor(log.type)
-                  }
-                >
-                  <div className="flex-1">
-                    <div className="flex gap-2 items-center mb-1">
-                      <span className="text-xs font-semibold text-gray-400 uppercase">
-                        {log.type}
-                      </span>
-                      {log.deviceId && (
-                        <span className="text-xs text-gray-600 font-mono">
-                          [{log.deviceId}]
+              <div className="divide-y divide-white/5">
+                {filteredLogs.map((log, idx) => {
+                  const messageText = typeof log === 'string' ? log : (log.message || '');
+                  const logType = typeof log === 'object' ? log.type : 'info';
+                  const deviceId = typeof log === 'object' ? (log.deviceId || log.device_id) : null;
+                  const timestamp = typeof log === 'object' ? log.timestamp : Date.now();
+
+                  return (
+                    <div key={log.id || idx} className="p-4 hover:bg-white/5 transition">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <span className={cn(
+                              'text-xs font-mono font-bold px-2 py-1 rounded',
+                              logType === 'error' && 'bg-red-500/20 text-red-300',
+                              logType === 'success' && 'bg-emerald-500/20 text-emerald-300',
+                              logType === 'warning' && 'bg-yellow-500/20 text-yellow-300',
+                              logType === 'command' && 'bg-blue-500/20 text-blue-300',
+                              logType === 'info' && 'bg-slate-500/20 text-slate-300'
+                            )}>
+                              {logType.toUpperCase()}
+                            </span>
+                            {deviceId && (
+                              <span className="text-xs text-slate-400 font-mono bg-slate-900/50 px-2 py-1 rounded">
+                                {deviceId}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-slate-300 break-words">{messageText}</p>
+                        </div>
+                        <span className="text-xs text-slate-500 whitespace-nowrap font-mono">
+                          {formatTimeAgo(timestamp)}
                         </span>
-                      )}
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-300">{log.message}</p>
-                  </div>
-                  <span className="text-xs text-gray-600 whitespace-nowrap ml-4">
-                    {formatTimeAgo(log.timestamp)}
-                  </span>
-                </div>
-              )))
-            }
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </section>
+      </div>
+    </main>
   );
+
+  
 }

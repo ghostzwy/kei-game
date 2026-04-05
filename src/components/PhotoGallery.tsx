@@ -106,7 +106,7 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
             <button
               type="button"
               onClick={handleCapture}
-              disabled={!targetId || sending}
+              disabled={Boolean(!targetId || sending)}
               className={cn(
                 'inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-2.5 text-xs font-bold uppercase transition-all',
                 'border-cyan-500/30 bg-cyan-500/10 text-cyan-200 hover:border-cyan-400/70 hover:bg-cyan-500/15',

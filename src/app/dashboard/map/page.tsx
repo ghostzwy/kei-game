@@ -37,10 +37,9 @@ export default function MapPage() {
       return {
         ...loc,
         battery: device?.battery,
-        model: device?.model || device?.deviceInfo?.model || 'Unknown',
+        model: device?.model || 'Unknown',
         status: device?.status,
-        ip: device?.ip || device?.deviceInfo?.ip || 'Unknown',
-        appType: device?.appType,
+        ip: device?.ip_address || 'Unknown',
       };
     });
   }, [locations, devices]);
@@ -119,7 +118,7 @@ export default function MapPage() {
            <div className="bg-[#0a0b10] border border-orange-500/20 rounded-3xl p-6 shadow-xl">
               <p className="text-xs text-gray-500 uppercase tracking-tighter mb-1">Last Update</p>
               <h3 className="text-lg font-mono text-orange-400">
-                {filteredLocations[0]?.time ? new Date(filteredLocations[0].time).toLocaleTimeString() : 'N/A'}
+                {filteredLocations[0]?.timestamp ? new Date(filteredLocations[0].timestamp).toLocaleTimeString() : 'N/A'}
               </h3>
               <p className="text-[10px] text-orange-500/60 mt-2 font-mono">SYNCING WITH FIREBASE DB</p>
            </div>
@@ -161,7 +160,7 @@ export default function MapPage() {
                             </div>
                             <div>
                                <div className="font-bold text-white group-hover:text-[#00ff41] transition-colors">{loc.deviceId}</div>
-                               <div className="text-[10px] text-gray-500">{loc.model} • {loc.appType || 'SYS'}</div>
+                               <div className="text-[10px] text-gray-500">{loc.model}</div>
                             </div>
                          </div>
                       </td>
@@ -180,7 +179,7 @@ export default function MapPage() {
                       <td className="px-6 py-4">
                          <div className="flex items-center gap-2 text-gray-500">
                             <Clock size={12} />
-                            <span className="text-xs">{loc.time ? new Date(loc.time).toLocaleString('id-ID') : 'Unknown'}</span>
+                            <span className="text-xs">{loc.timestamp ? new Date(loc.timestamp).toLocaleString('id-ID') : 'Unknown'}</span>
                          </div>
                       </td>
                       <td className="px-6 py-4">

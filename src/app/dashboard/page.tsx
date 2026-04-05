@@ -107,7 +107,11 @@ export default function DashboardPage() {
             busyTargetId={busyTargetId}
           />
 
-          <PhotoGallery targetId={selectedTarget?.id} />
+          <PhotoGallery 
+            targetId={selectedTarget?.id} 
+            targets={targets}
+            onTargetChange={(deviceId) => setSelectedTargetId(deviceId)}
+          />
 
           <ActivityLog targetId={selectedTarget?.id} />
         </div>

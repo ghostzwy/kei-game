@@ -37,16 +37,15 @@ export { auth, database, storage, app };
 
 /**
  * Firebase Schema Paths
+ * Disesuaikan agar sinkron antara Aplikasi Android (KeiService.java) dan Dashboard Web
  */
 export const FIREBASE_PATHS = {
-  ACTIVE_TARGETS: '/kei-vault/active_targets',
-  DEVICE_LOCATIONS: '/kei-vault/device_locations',
-  LOCATIONS: '/kei-vault/device_locations',
-  PHOTOS: '/kei-vault/photos',
-  COMMANDS: '/kei-vault/commands',
-  ACTIVITY_LOGS: '/kei-vault/activity_logs',
-  SYSTEM_LOGS: '/kei-vault/system_logs',
-  STATS: '/kei-vault/stats',
-  USERS: '/users',
-  LOGS: '/kei-vault/system_logs',
+  ACTIVE_TARGETS: 'kei-vault/active_targets',
+  PHOTOS: 'kei-vault/photos',
+  COMMANDS: 'Commands',
+  SYSTEM_LOGS: 'system_logs',
+  ACTIVITY_LOGS: 'system_logs', // alias for activity log hooks
+  LOCATIONS: 'kei-vault/locations',
+  DEVICE_LOCATIONS: 'kei-vault/locations', // backward compatibility alias
+  STATS: 'kei-vault/stats',
 } as const;

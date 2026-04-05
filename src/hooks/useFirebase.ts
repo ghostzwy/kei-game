@@ -58,7 +58,7 @@ export function useDeviceLocations() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const locationsRef = ref(database, FIREBASE_PATHS.DEVICE_LOCATIONS);
+    const locationsRef = ref(database, FIREBASE_PATHS.LOCATIONS);
 
     const unsubscribe = onValue(
       locationsRef,

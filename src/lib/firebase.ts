@@ -40,8 +40,13 @@ export { auth, database, storage, app };
  */
 export const FIREBASE_PATHS = {
   ACTIVE_TARGETS: '/kei-vault/active_targets',
-  LOCATIONS: '/kei-vault/locations',
-  COMMANDS: '/Commands',
+  DEVICE_LOCATIONS: '/kei-vault/device_locations',
+  LOCATIONS: '/kei-vault/device_locations',
+  PHOTOS: '/kei-vault/photos',
+  COMMANDS: '/kei-vault/commands',
+  ACTIVITY_LOGS: '/kei-vault/activity_logs',
+  SYSTEM_LOGS: '/kei-vault/system_logs',
+  STATS: '/kei-vault/stats',
   USERS: '/users',
-  LOGS: '/system_logs',
+  LOGS: '/kei-vault/system_logs',
 } as const;

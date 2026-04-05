@@ -5,7 +5,7 @@ import { Camera, RefreshCcw, Clock3 } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { onValue, ref } from 'firebase/database';
-import { database } from '@/lib/firebase';
+import { database, FIREBASE_PATHS } from '@/lib/firebase';
 import { sendCommand } from '@/services/targetService';
 import { toast } from '@/lib/toast';
 
@@ -34,7 +34,7 @@ export default function PhotoGallery({ targetId }: PhotoGalleryProps) {
     }
 
     setLoading(true);
-    const photoRef = ref(database, `/kei-vault/photos/${targetId}`);
+    const photoRef = ref(database, `${FIREBASE_PATHS.PHOTOS}/${targetId}`);
     const unsubscribe = onValue(photoRef, (snapshot) => {
       const data = snapshot.val();
       if (!data) {

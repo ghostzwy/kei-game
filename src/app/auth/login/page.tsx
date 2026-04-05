@@ -45,39 +45,6 @@ export default function LoginPage() {
         return;
       }
 
-      // Demo credentials fallback
-      const DEMO_ACCOUNTS = [
-        { email: 'admin1@kei-game.local', password: 'Admin@123456' },
-        { email: 'admin2@kei-game.local', password: 'Admin@654321' },
-      ];
-
-      const demoMatch = DEMO_ACCOUNTS.find(a => a.email === email && a.password === password);
-      
-      if (demoMatch) {
-        console.log('✓ Demo login (no Firebase):', email);
-        // Store user session
-        const userData = {
-          uid: `demo_${Date.now()}`,
-          email: email,
-          displayName: 'Admin User',
-          loginTime: new Date().toISOString(),
-          isDemoMode: true,
-        };
-        localStorage.setItem('kei_user', JSON.stringify(userData));
-        
-        // Set auth_token cookie for middleware
-        document.cookie = `auth_token=demo_${Date.now()}_${email}; path=/; max-age=86400`;
-        
-        console.log('💾 User saved to localStorage and auth_token cookie set');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        console.log('🚀 Redirecting to dashboard...');
-        // Use window.location as fallback
-        setTimeout(() => {
-          window.location.href = '/dashboard';
-        }, 500);
-        return;
-      }
-
       console.log('🔑 Calling Firebase signInWithEmailAndPassword...');
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('✓ Login successful:', userCredential.user.email);
@@ -161,7 +128,7 @@ export default function LoginPage() {
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin1@kei-game.local"
+                  placeholder="your.email@example.com"
                   disabled={isLoading}
                   className="w-full px-3 py-2 bg-[#0a0b10] border border-[#00ff41]/30 rounded text-[#00ff41] placeholder-gray-600 focus:border-[#00ff41] focus:outline-none focus:ring-1 focus:ring-[#00ff41]/20 disabled:opacity-50"
                 />
@@ -221,9 +188,6 @@ export default function LoginPage() {
         <div className="mt-6 p-3 border border-[#00ff41]/20 rounded text-xs font-mono text-gray-400">
           <p className="text-[#00ff41]">$ System Status: {authReady ? 'ONLINE' : 'INITIALIZING'}</p>
           <p className="text-gray-600">$ Firebase: {authReady ? '✓ Connected' : '○ Connecting...'}</p>
-          <p className="text-gray-600 mt-2">$ Demo accounts:</p>
-          <p className="text-gray-600 ml-2">admin1@kei-game.local / Admin@123456</p>
-          <p className="text-gray-600 ml-2">admin2@kei-game.local / Admin@654321</p>
         </div>
       </div>
     </div>

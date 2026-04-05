@@ -6,7 +6,7 @@
 
 import React, { useMemo } from 'react';
 import 'leaflet/dist/leaflet.css';
-import { useDeviceLocations } from '@/hooks/useFirebase';
+import { useDeviceLocations, useActiveDevices } from '@/hooks/useFirebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import dynamic from 'next/dynamic';
 
@@ -27,12 +27,27 @@ const Tooltip = dynamic(() => import('react-leaflet').then((mod) => mod.Tooltip)
 });
 
 export default function MapPage() {
-  const { locations, isLoading } = useDeviceLocations();
+  const { locations, isLoading: locationsLoading } = useDeviceLocations();
+  const { devices, isLoading: devicesLoading } = useActiveDevices();
+
+  const isLoading = locationsLoading || devicesLoading;
+
+  const enrichedLocations = useMemo(() => {
+    return locations.map((loc) => {
+      const device = devices.find((d) => d.id === loc.deviceId);
+      return {
+        ...loc,
+        battery: device?.battery,
+        model: device?.model,
+        status: device?.status,
+      };
+    });
+  }, [locations, devices]);
 
   const validLocations = useMemo(
     () =>
-      locations.filter((loc) => typeof loc.lat === 'number' && typeof loc.lng === 'number'),
-    [locations]
+      enrichedLocations.filter((loc) => typeof loc.lat === 'number' && typeof loc.lng === 'number'),
+    [enrichedLocations]
   );
 
   const mapCenter = useMemo(() => {
@@ -88,13 +103,18 @@ export default function MapPage() {
                   pathOptions={{ color: '#34d399', fillColor: '#34d399', fillOpacity: 0.75 }}
                 >
                   <Popup>
-                    <div className="space-y-1 text-sm text-slate-900">
-                      <p className="font-semibold">{loc.deviceId}</p>
-                      <p>Lat: {loc.lat.toFixed(6)}</p>
-                      <p>Lng: {loc.lng.toFixed(6)}</p>
-                      <p>Timestamp: {new Date(loc.timestamp).toLocaleString('id-ID')}</p>
+                    <div className="space-y-2 text-sm text-slate-900 min-w-[200px]">
+                      <div className="font-semibold text-lg border-b pb-2">{loc.deviceId}</div>
+                      <div className="space-y-1">
+                        <p><strong>Model:</strong> {loc.model || 'Unknown'}</p>
+                        <p><strong>Battery:</strong> {loc.battery !== undefined ? `${loc.battery}%` : 'Unknown'}</p>
+                        <p><strong>Status:</strong> {loc.status || 'Unknown'}</p>
+                        <p><strong>Lat:</strong> {loc.lat.toFixed(6)}</p>
+                        <p><strong>Lng:</strong> {loc.lng.toFixed(6)}</p>
+                        <p><strong>Timestamp:</strong> {new Date(loc.timestamp).toLocaleString('id-ID')}</p>
+                      </div>
                       <a
-                        className="text-xs text-slate-700 underline"
+                        className="inline-block mt-2 text-xs text-slate-700 underline hover:text-slate-900"
                         href={`https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=18/${loc.lat}/${loc.lng}`}
                         target="_blank"
                         rel="noreferrer"
@@ -120,7 +140,7 @@ export default function MapPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {locations.map((loc) => {
+              {enrichedLocations.map((loc) => {
                 const latitude = loc.latitude ?? loc.lat;
                 const longitude = loc.longitude ?? loc.lng;
 
@@ -129,7 +149,12 @@ export default function MapPage() {
                     key={loc.deviceId}
                     className="p-3 bg-[#0a0b10] border border-[#00ff41]/20 rounded flex justify-between items-center"
                   >
-                    <span className="text-sm font-mono text-[#00ff41]">{loc.deviceId}</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-mono text-[#00ff41]">{loc.deviceId}</span>
+                      <span className="text-xs text-gray-500">
+                        Model: {loc.model || 'Unknown'} | Battery: {loc.battery !== undefined ? `${loc.battery}%` : 'Unknown'}
+                      </span>
+                    </div>
                     <span className="text-xs text-gray-500">
                       {latitude !== undefined && longitude !== undefined
                         ? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`

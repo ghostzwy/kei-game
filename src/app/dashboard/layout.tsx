@@ -14,7 +14,6 @@ import {
   Users,
   Camera,
   MapPin,
-  Folder,
   MessageSquare,
   Settings,
   LogOut,
@@ -25,7 +24,6 @@ const navItems = [
   { icon: Users, label: 'Target', href: '/dashboard/target', shortcut: '👥' },
   { icon: Camera, label: 'Cam', href: '/dashboard/camera', shortcut: '📷' },
   { icon: MapPin, label: 'GPS', href: '/dashboard/map', shortcut: '📍' },
-  { icon: Folder, label: 'Files', href: '/dashboard/files', shortcut: '📂' },
   { icon: MessageSquare, label: 'Logs', href: '/dashboard/logs', shortcut: '💬' },
 ];
 

@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/Button';
 import { useSystemLogs } from '@/hooks/useFirebase';
 import { formatTimeAgo } from '@/lib/utils';
-import { motion } from 'framer-motion';
 import { Search, Filter, Download, Trash2 } from 'lucide-react';
 import { SystemLog } from '@/types';
 
@@ -42,12 +41,7 @@ export default function LogsPage() {
   };
 
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="space-y-6">
       <div>
         <h1 className="text-4xl font-bold text-[#00ff41] mb-2">System Logs</h1>
         <p className="text-gray-400">Comprehensive audit trail of all system activities</p>
@@ -119,13 +113,12 @@ export default function LogsPage() {
               <div className="text-center py-8 text-gray-400">No logs found</div>
             ) : (
               filteredLogs.map((log) => (
-                <motion.div
+                <div
                   key={log.id}
-                  className={`p-3 border rounded flex justify-between items-start ${getLogBgColor(
-                    log.type
-                  )}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  className={
+                    'p-3 border rounded flex justify-between items-start ' +
+                    getLogBgColor(log.type)
+                  }
                 >
                   <div className="flex-1">
                     <div className="flex gap-2 items-center mb-1">
@@ -143,12 +136,12 @@ export default function LogsPage() {
                   <span className="text-xs text-gray-600 whitespace-nowrap ml-4">
                     {formatTimeAgo(log.timestamp)}
                   </span>
-                </motion.div>
-              ))
-            )}
+                </div>
+              )))
+            }
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }

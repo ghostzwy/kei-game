@@ -7,7 +7,6 @@
 import React, { useEffect } from 'react';
 import { useDeviceLocations } from '@/hooks/useFirebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 
 // Dynamically import Leaflet map component
@@ -28,12 +27,7 @@ export default function MapPage() {
   const { locations, isLoading } = useDeviceLocations();
 
   return (
-    <motion.div
-      className="space-y-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="space-y-6">
       <div>
         <h1 className="text-4xl font-bold text-[#00ff41] mb-2">Target Map</h1>
         <p className="text-gray-400">Global device location tracking</p>
@@ -72,21 +66,28 @@ export default function MapPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {locations.map((loc) => (
-                <div
-                  key={loc.deviceId}
-                  className="p-3 bg-[#0a0b10] border border-[#00ff41]/20 rounded flex justify-between items-center"
-                >
-                  <span className="text-sm font-mono text-[#00ff41]">{loc.deviceId}</span>
-                  <span className="text-xs text-gray-500">
-                    {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
-                  </span>
-                </div>
-              ))}
+              {locations.map((loc) => {
+                const latitude = loc.latitude ?? loc.lat;
+                const longitude = loc.longitude ?? loc.lng;
+
+                return (
+                  <div
+                    key={loc.deviceId}
+                    className="p-3 bg-[#0a0b10] border border-[#00ff41]/20 rounded flex justify-between items-center"
+                  >
+                    <span className="text-sm font-mono text-[#00ff41]">{loc.deviceId}</span>
+                    <span className="text-xs text-gray-500">
+                      {latitude !== undefined && longitude !== undefined
+                        ? `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+                        : 'Coordinates unavailable'}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
       )}
-    </motion.div>
+    </div>
   );
 }

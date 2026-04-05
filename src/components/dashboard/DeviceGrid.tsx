@@ -57,16 +57,16 @@ function DeviceCard({ device }: DeviceCardProps) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs text-gray-500">Battery</p>
-            <span className="text-sm font-mono text-[#00ff41]">{device.battery}%</span>
+            <span className="text-sm font-mono text-[#00ff41]">{device.battery ?? 0}%</span>
           </div>
-          <Progress value={device.battery} max={100} />
+          <Progress value={device.battery ?? 0} max={100} />
         </div>
 
         {/* Last Seen */}
         <div>
           <p className="text-xs text-gray-500 mb-1">Last Seen</p>
           <p className="text-sm text-gray-400">
-            {formatTimeAgo(device.lastSeen)}
+            {device.lastSeen ? formatTimeAgo(device.lastSeen) : 'Unknown'}
           </p>
         </div>
 

@@ -11,16 +11,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const deviceId = searchParams.get('deviceId');
-
-    if (!deviceId) {
-      return NextResponse.json(
-        { error: 'Missing deviceId parameter' },
-        { status: 400 }
-      );
-    }
-
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
 
@@ -31,7 +21,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get latest messages from chat
+    // Get latest messages from bot updates
     const messagesUrl = `https://api.telegram.org/bot${botToken}/getUpdates`;
     const messagesResponse = await fetch(messagesUrl);
     const messagesData = await messagesResponse.json();
@@ -43,18 +33,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find latest photo from specified chat/channel
+    // Find latest photo from configured chat/channel
     let latestPhotoFileId: string | null = null;
-    
     for (const update of messagesData.result.reverse()) {
-      const message = update.message || update.channel_post;
-      
-      if (message && message.photo) {
-        // Get highest resolution photo
-        const photo = message.photo[message.photo.length - 1];
-        latestPhotoFileId = photo.file_id;
-        break;
-      }
+      const message = update.message || update.channel_post || update.edited_message;
+      if (!message || !message.photo || !message.chat) continue;
+
+      const currentChatId = String(message.chat.id);
+      if (currentChatId !== chatId) continue;
+
+      const photo = message.photo[message.photo.length - 1];
+      latestPhotoFileId = photo.file_id;
+      break;
     }
 
     if (!latestPhotoFileId) {

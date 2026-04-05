@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Shield, Database, Radio, Zap, LogOut } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -29,11 +28,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-black text-[#00ff41] p-8">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-center mb-8"
-      >
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-5xl font-bold font-mono tracking-wider mb-2">[KEI DASHBOARD]</h1>
           <p className="text-gray-400 font-mono text-sm">v3.0 - Military Grade Command Center</p>
@@ -45,15 +40,10 @@ export default function DashboardPage() {
           <LogOut size={16} />
           Logout
         </Button>
-      </motion.div>
+      </div>
 
       {/* Statistics */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
-      >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <Card className="border-[#00ff41]/30 bg-black p-6">
           <div className="flex justify-between items-start">
             <div>
@@ -83,24 +73,17 @@ export default function DashboardPage() {
             <Zap className="text-[#00ff41]" size={24} />
           </div>
         </Card>
-      </motion.div>
+      </div>
 
       {/* Devices List */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
+      <div>
         <div className="mb-4">
           <h2 className="text-2xl font-bold font-mono">▶ ACTIVE TARGETS</h2>
         </div>
         <Card className="border-[#00ff41]/30 bg-black">
-          {devices.map((device, idx) => (
-            <motion.div
+          {devices.map((device) => (
+            <div
               key={device.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 + idx * 0.1 }}
               className="p-4 border-b border-[#00ff41]/10 last:border-0 hover:bg-[#00ff41]/5 transition-colors"
             >
               <div className="flex justify-between items-center">
@@ -119,21 +102,16 @@ export default function DashboardPage() {
                   <p className="text-sm mt-1">{device.battery}% BATTERY</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </Card>
-      </motion.div>
+      </div>
 
       {/* Status Footer */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-8 p-4 border border-[#00ff41]/20 rounded font-mono text-sm"
-      >
+      <div className="mt-8 p-4 border border-[#00ff41]/20 rounded font-mono text-sm">
         <p>✓ Dashboard initialized successfully</p>
         <p className="text-gray-600 mt-2">Status: ONLINE | Devices connected: {stats.total} | Auth: VERIFIED</p>
-      </motion.div>
+      </div>
     </div>
   );
 }

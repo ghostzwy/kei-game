@@ -28,10 +28,24 @@ export function useActiveDevices() {
       (snapshot) => {
         const data = snapshot.val();
         if (data) {
-          const deviceArray: Device[] = Object.entries(data).map(([id, device]: any) => ({
-            ...device,
-            id,
-          }));
+          const currentTime = Date.now();
+          const OFFLINE_THRESHOLD = 5 * 60 * 1000; // 5 menit (batas waktu dianggap offline/terhapus)
+
+          const deviceArray: Device[] = Object.entries(data).map(([id, device]: any) => {
+            let currentStatus = device.status;
+            const lastPing = device.last_ping || device.lastSeen || 0;
+
+            // Auto-Offline Detection: Jika tidak ada ping selama 5 menit, dianggap Offline/Terhapus
+            if (lastPing > 0 && (currentTime - lastPing > OFFLINE_THRESHOLD)) {
+              currentStatus = 'offline';
+            }
+
+            return {
+              ...device,
+              status: currentStatus,
+              id,
+            };
+          });
           setDevices(deviceArray);
         } else {
           setDevices([]);
@@ -278,7 +292,7 @@ export function useImageCaptures(deviceId?: string) {
         const capturesPath = deviceId
           ? `kei-vault/captures/${deviceId}`
           : 'kei-vault/captures';
-        
+
         const capturesRef = storageRef(storage, capturesPath);
         const result = await listAll(capturesRef);
 

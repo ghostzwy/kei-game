@@ -8,13 +8,8 @@ import { FirebaseProvider } from "@/providers/FirebaseProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Kei Dashboard v3.0 - Command & Control Center',
-  description: 'Professional-grade real-time monitoring and command execution dashboard',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  } as any,
+  title: 'KEI OS — Command & Control Center',
+  description: 'Military-grade real-time device monitoring and command execution dashboard',
 };
 
 export default function RootLayout({
@@ -26,13 +21,16 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
-        <meta name="theme-color" content="#0a0b10" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+        <meta name="theme-color" content="#030712" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Roboto+Mono:wght@400;500;700&display=swap"
-          rel="preconnect"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+          rel="stylesheet"
         />
       </head>
-      <body className="bg-gradient-to-br from-[#020617] via-[#0a0b10] to-[#020617] text-white antialiased font-mono overflow-x-hidden">
+      <body className="bg-[#030712] text-white antialiased overflow-x-hidden">
         <FirebaseProvider>
           {children}
         </FirebaseProvider>

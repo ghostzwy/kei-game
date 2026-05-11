@@ -1,30 +1,34 @@
 /**
  * Overwatch Dashboard Layout
- * Flying Bird Admin Monitoring System
+ * Premium C2 Admin Panel — Glassmorphism + Cyberpunk
  */
 
 'use client';
 
-import React from 'react';
-import { cn } from '@/lib/cn';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
-  Home,
-  Users,
+  LayoutDashboard,
+  Crosshair,
   Camera,
   MapPin,
-  MessageSquare,
+  ScrollText,
   Settings,
   LogOut,
+  Zap,
+  Shield,
+  Menu,
+  X,
+  ChevronRight,
 } from 'lucide-react';
 
 const navItems = [
-  { icon: Home, label: 'Dash', href: '/dashboard', shortcut: '🏠' },
-  { icon: Users, label: 'Target', href: '/dashboard/target', shortcut: '👥' },
-  { icon: Camera, label: 'Cam', href: '/dashboard/camera', shortcut: '📷' },
-  { icon: MapPin, label: 'GPS', href: '/dashboard/map', shortcut: '📍' },
-  { icon: MessageSquare, label: 'Logs', href: '/dashboard/logs', shortcut: '💬' },
+  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+  { icon: Crosshair, label: 'Targets', href: '/dashboard/target' },
+  { icon: Camera, label: 'Camera', href: '/dashboard/camera' },
+  { icon: MapPin, label: 'GPS Track', href: '/dashboard/map' },
+  { icon: ScrollText, label: 'Logs', href: '/dashboard/logs' },
 ];
 
 export default function DashboardLayout({
@@ -34,7 +38,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [selectedTarget] = React.useState('SM-G998B');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('kei_user');
@@ -43,29 +47,68 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white font-mono">
-      {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-screen w-64 bg-[#020617] border-r border-emerald-500/30 flex flex-col p-4">
-        {/* Header */}
-        <div className="pb-6 border-b border-emerald-500/30">
-          <h1 className="text-sm font-bold text-emerald-400 tracking-wider uppercase">
-            ◆ OVERWATCH v1.0
-          </h1>
-          <p className="text-xs text-emerald-500/60 mt-2">[Admin]</p>
-          <div className="flex items-center gap-2 mt-3">
-            <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-            <span className="text-xs text-emerald-400">Status: 🟢 Connected</span>
+    <div className="min-h-screen bg-[#030712] text-white">
+      {/* Mobile menu toggle */}
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 rounded-xl bg-slate-900/90 border border-emerald-500/20 backdrop-blur-xl text-emerald-400 hover:bg-slate-800 transition-colors"
+      >
+        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[45] lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar ── */}
+      <aside
+        className={`
+          fixed left-0 top-0 h-screen z-50
+          w-[260px] flex flex-col
+          bg-[#030712]/95 backdrop-blur-2xl
+          border-r border-emerald-500/10
+          transition-transform duration-300 ease-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
+        {/* ── Brand ── */}
+        <div className="px-5 pt-7 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                <Shield size={20} className="text-black" />
+              </div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#030712] animate-pulse" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold text-white tracking-wide">KEI OS</h1>
+              <p className="text-[10px] text-emerald-400/60 font-mono uppercase tracking-[0.2em]">C2 Command Center</p>
+            </div>
           </div>
         </div>
 
-        {/* Target Info */}
-        <div className="mt-6 mb-6 p-3 border border-emerald-500/30 bg-emerald-500/5 rounded">
-          <p className="text-xs text-emerald-500/60">Target:</p>
-          <p className="text-sm text-emerald-400 font-bold font-mono mt-1">{selectedTarget}</p>
+        {/* ── Status bar ── */}
+        <div className="mx-5 mb-5 px-3.5 py-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/15">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-sm shadow-emerald-400" />
+              <span className="text-[11px] text-emerald-400/80 font-medium">System Online</span>
+            </div>
+            <span className="text-[10px] text-slate-500 font-mono">v3.0</span>
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 space-y-2">
+        {/* ── Divider ── */}
+        <div className="mx-5 mb-3">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500/80 font-semibold">Navigation</p>
+        </div>
+
+        {/* ── Nav Items ── */}
+        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -74,48 +117,60 @@ export default function DashboardLayout({
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded text-xs transition-all border',
-                  isActive
-                    ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-lg shadow-emerald-500/20'
-                    : 'border-emerald-500/20 text-emerald-500/70 hover:border-emerald-400 hover:text-emerald-400'
-                )}
+                onClick={() => setSidebarOpen(false)}
+                className={`
+                  group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200
+                  ${isActive
+                    ? 'bg-emerald-500/15 text-emerald-400 shadow-sm shadow-emerald-500/10 border border-emerald-500/20'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04] border border-transparent'
+                  }
+                `}
               >
-                <Icon size={16} />
-                <span className="font-semibold">[{item.label.toUpperCase()}]</span>
+                <Icon size={18} strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className="flex-1">{item.label}</span>
+                {isActive && (
+                  <ChevronRight size={14} className="text-emerald-500/60" />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        {/* Divider */}
-        <div className="my-4 border-t border-emerald-500/20" />
+        {/* ── Bottom section ── */}
+        <div className="px-3 pb-5 space-y-1.5">
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-700/50 to-transparent mb-3" />
 
-        {/* Setup & Exit */}
-        <Link
-          href="/dashboard/settings"
-          className="flex items-center gap-3 px-3 py-2 rounded text-xs border border-emerald-500/20 text-emerald-500/70 hover:border-emerald-400 hover:text-emerald-400 transition-all"
-        >
-          <Settings size={16} />
-          <span className="font-semibold">[⚙️ SETUP]</span>
-        </Link>
+          <Link
+            href="/dashboard/command-center"
+            onClick={() => setSidebarOpen(false)}
+            className={`
+              group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-200
+              ${pathname === '/dashboard/command-center'
+                ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/20'
+                : 'text-slate-400 hover:text-white hover:bg-white/[0.04] border border-transparent'
+              }
+            `}
+          >
+            <Settings size={18} strokeWidth={1.8} />
+            <span className="flex-1">Command Center</span>
+          </Link>
 
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded text-xs border border-red-500/30 text-red-400/70 hover:border-red-400 hover:text-red-400 transition-all mt-2"
-        >
-          <LogOut size={16} />
-          <span className="font-semibold">[EXIT]</span>
-        </button>
+          <button
+            onClick={handleLogout}
+            className="w-full group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[13px] font-medium text-slate-500 hover:text-red-400 hover:bg-red-500/[0.06] border border-transparent transition-all duration-200"
+          >
+            <LogOut size={18} strokeWidth={1.8} />
+            <span className="flex-1 text-left">Logout</span>
+          </button>
+        </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="ml-64">
-        <div className="p-6">
+      {/* ── Main Content ── */}
+      <main className="lg:ml-[260px] min-h-screen">
+        <div className="p-4 lg:p-6 max-w-[1600px] mx-auto">
           {children}
         </div>
       </main>
     </div>
   );
 }
-

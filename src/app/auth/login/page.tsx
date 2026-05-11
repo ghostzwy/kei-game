@@ -1,14 +1,12 @@
 /**
- * Login Page - Fixed with Email Trimming
+ * Login Page - KEI OS Terminal Access
  */
 
 'use client';
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
+import { Lock, Mail, AlertCircle, Loader2, Shield } from 'lucide-react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 
@@ -19,7 +17,6 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [authReady, setAuthReady] = useState(false);
 
-  // Check Firebase initialization
   React.useEffect(() => {
     if (auth) {
       setAuthReady(true);
@@ -33,7 +30,6 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    // FIX: Trim email and password to avoid hidden spaces
     const cleanEmail = email.trim();
     const cleanPassword = password.trim();
 
@@ -64,7 +60,7 @@ export default function LoginPage() {
       const errorMap: { [key: string]: string } = {
         'auth/user-not-found': 'User tidak ditemukan.',
         'auth/wrong-password': 'Password salah',
-        'auth/invalid-email': 'Format email tidak valid. Pastikan tidak ada spasi.',
+        'auth/invalid-email': 'Format email tidak valid.',
         'auth/invalid-credential': 'Email atau password salah.',
         'auth/operation-not-allowed': 'Sign-in belum enabled di Firebase.',
         'auth/too-many-requests': 'Terlalu banyak percobaan. Coba lagi nanti.',
@@ -78,75 +74,81 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0b10] flex items-center justify-center p-4 font-mono">
+    <div className="min-h-screen bg-[#030712] flex items-center justify-center p-4">
+      {/* Background grid pattern */}
       <div
-        className="fixed inset-0 opacity-10 pointer-events-none"
+        className="fixed inset-0 opacity-[0.03] pointer-events-none"
         style={{
           backgroundImage:
-            'radial-gradient(circle, #00ff41 1px, transparent 1px)',
-          backgroundSize: '50px 50px',
+            'linear-gradient(rgba(16, 185, 129, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.3) 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
         }}
       />
 
-      <div className="w-full max-w-md relative z-10">
-        <Card className="border-[#00ff41]/20 bg-black/60 backdrop-blur-xl">
-          <CardHeader className="text-center space-y-2">
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 bg-[#00ff41] rounded flex items-center justify-center shadow-[0_0_20px_rgba(0,255,65,0.4)]">
-                <Lock size={24} className="text-black" />
-              </div>
+      {/* Decorative blurs */}
+      <div className="fixed top-1/4 left-1/4 w-96 h-96 bg-emerald-500/[0.04] rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed bottom-1/4 right-1/4 w-64 h-64 bg-cyan-500/[0.03] rounded-full blur-[100px] pointer-events-none" />
+
+      <div className="w-full max-w-sm relative z-10">
+        {/* ── Card ── */}
+        <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] backdrop-blur-xl p-7">
+          {/* Logo */}
+          <div className="text-center mb-7">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-lg shadow-emerald-500/20 mb-4">
+              <Shield size={26} className="text-black" />
             </div>
-            <CardTitle className="text-2xl text-[#00ff41] font-bold tracking-widest">KEI OS Terminal</CardTitle>
-            <CardDescription className="text-gray-400">Military-Grade Restricted Access</CardDescription>
-          </CardHeader>
+            <h1 className="text-2xl font-bold text-white tracking-tight">KEI OS</h1>
+            <p className="text-xs text-slate-500 mt-1">Restricted Access Terminal</p>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-tighter font-bold text-[#00ff41] flex items-center gap-2">
-                  <Mail size={14} /> Email Address
-                </label>
-                <input
-                  type="text"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@kei-os.local"
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 bg-black border border-[#00ff41]/30 rounded text-[#00ff41] placeholder-gray-800 focus:border-[#00ff41] focus:outline-none focus:ring-1 focus:ring-[#00ff41]/20"
-                />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
+                <Mail size={12} /> Email
+              </label>
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@kei-os.local"
+                disabled={isLoading}
+                className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white text-sm placeholder-slate-600 focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all disabled:opacity-50"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
+                <Lock size={12} /> Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={isLoading}
+                className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-white text-sm placeholder-slate-600 focus:border-emerald-500/40 focus:ring-1 focus:ring-emerald-500/20 outline-none transition-all disabled:opacity-50"
+              />
+            </div>
+
+            {error && (
+              <div className="p-3 bg-red-500/[0.06] border border-red-500/15 rounded-xl flex items-start gap-2.5">
+                <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
+                <span className="text-xs text-red-300 leading-relaxed">{error}</span>
               </div>
+            )}
 
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-tighter font-bold text-[#00ff41] flex items-center gap-2">
-                  <Lock size={14} /> Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  disabled={isLoading}
-                  className="w-full px-4 py-3 bg-black border border-[#00ff41]/30 rounded text-[#00ff41] placeholder-gray-800 focus:border-[#00ff41] focus:outline-none focus:ring-1 focus:ring-[#00ff41]/20"
-                />
-              </div>
+            <button
+              type="submit"
+              disabled={isLoading || !email || !password || !authReady}
+              className="w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-black font-bold text-sm rounded-xl shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+            >
+              {isLoading ? <Loader2 size={18} className="animate-spin mx-auto" /> : 'Authenticate'}
+            </button>
+          </form>
+        </div>
 
-              {error && (
-                <div className="p-4 bg-red-950/40 border border-red-500/50 rounded flex items-start gap-3">
-                  <AlertCircle size={18} className="text-red-500 shrink-0 mt-0.5" />
-                  <span className="text-xs text-red-200 leading-relaxed">{error}</span>
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={isLoading || !email || !password || !authReady}
-                className="w-full h-12 bg-[#00ff41] hover:bg-[#00cc33] text-black font-black uppercase tracking-widest shadow-[0_0_15px_rgba(0,255,65,0.2)]"
-              >
-                {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Authenticate'}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        <p className="text-center text-[10px] text-slate-600 mt-4 font-mono">KEI OS v3.0 — Authorized Personnel Only</p>
       </div>
     </div>
   );

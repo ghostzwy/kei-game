@@ -38,12 +38,12 @@ export async function GET(request: Request) {
 
     // 4. Send capture command to each online device
     // Path matched with FIREBASE_PATHS.COMMANDS in lib/firebase.ts
-    const commandsRef = adminDb.ref('Commands');
+    const commandsRef = adminDb.ref('kei-vault/commands');
     const timestamp = Date.now();
     
     const sendPromises = onlineDeviceIds.map((id) => {
       return commandsRef.child(id).push({
-        command: 'capture_photo',
+        action: 'take_photo',
         timestamp: timestamp,
         status: 'pending',
         type: 'auto_cron'

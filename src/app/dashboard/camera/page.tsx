@@ -10,9 +10,9 @@ import { subscribeToTargets } from '@/services/targetService';
 import { Target } from '@/types/target';
 
 function TelegramLivePreview() {
-  const { photo, timestamp, isLoading, error, refresh } = useTelegramPhoto();
+  const { photos, isLoading, error, refresh } = useTelegramPhoto();
 
-  if (isLoading && !photo) {
+  if (isLoading && photos.length === 0) {
     return (
       <div className="aspect-square rounded-2xl bg-white/5 animate-pulse border border-white/10 flex items-center justify-center">
         <RefreshCcw size={24} className="text-cyan-500/50 animate-spin" />
@@ -36,25 +36,35 @@ function TelegramLivePreview() {
   }
 
   return (
-    <div className="relative group aspect-square rounded-2xl overflow-hidden border border-cyan-500/30 bg-black/40 shadow-lg shadow-cyan-500/10">
-      {photo ? (
-        <>
-          <img src={photo} alt="Telegram Live" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-          <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
-            <p className="text-[10px] text-cyan-400 font-mono font-bold">LATEST TELEGRAM CAPTURE</p>
-            <p className="text-[9px] text-white/60 font-mono mt-0.5">
-              {timestamp ? new Date(timestamp).toLocaleString() : 'Just now'}
-            </p>
-          </div>
+    <div className="space-y-3">
+      {photos.length > 0 ? (
+        <div className="grid grid-cols-2 gap-2">
+          {photos.slice(0, 4).map((photo, idx) => (
+            <div 
+              key={photo.fileId} 
+              className={cn(
+                "relative group overflow-hidden rounded-xl border border-white/10 bg-black/40",
+                idx === 0 && "col-span-2 aspect-video" || "aspect-square"
+              )}
+            >
+              <img src={photo.imageUrl} alt="Telegram Live" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
+                <p className="text-[8px] text-white/60 font-mono">
+                  {new Date(photo.timestamp).toLocaleTimeString()}
+                </p>
+              </div>
+            </div>
+          ))}
           <button 
             onClick={refresh}
-            className="absolute top-2 right-2 w-8 h-8 rounded-lg bg-black/60 border border-white/10 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-cyan-500/20 hover:border-cyan-500/50"
+            className="col-span-2 py-2 rounded-lg border border-cyan-500/20 bg-cyan-500/5 text-cyan-400 text-[10px] font-bold uppercase hover:bg-cyan-500/10 transition-colors flex items-center justify-center gap-2"
           >
-            <RefreshCcw size={14} />
+            <RefreshCcw size={12} className={isLoading ? 'animate-spin' : ''} />
+            {isLoading ? 'REFRESHING...' : 'REFRESH FEED'}
           </button>
-        </>
+        </div>
       ) : (
-        <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+        <div className="aspect-square flex flex-col items-center justify-center border border-white/10 rounded-2xl p-6 text-center">
           <ImageIcon size={32} className="text-slate-700 mb-2" />
           <p className="text-[10px] text-slate-500 font-mono">No Telegram photo found. Send a photo to the bot from APK.</p>
           <button 

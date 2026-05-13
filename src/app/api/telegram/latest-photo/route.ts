@@ -33,8 +33,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Find latest photo from configured chat/channel
-    let latestPhotoFileId: string | null = null;
+    // Find recent photos from configured chat/channel
+    const photos: any[] = [];
+    const seenFileIds = new Set();
+
     for (const update of messagesData.result.reverse()) {
       const message = update.message || update.channel_post || update.edited_message;
       if (!message || !message.photo || !message.chat) continue;
@@ -43,38 +45,47 @@ export async function GET(request: NextRequest) {
       if (currentChatId !== chatId) continue;
 
       const photo = message.photo[message.photo.length - 1];
-      latestPhotoFileId = photo.file_id;
-      break;
+      if (seenFileIds.has(photo.file_id)) continue;
+      
+      seenFileIds.add(photo.file_id);
+      photos.push({
+        fileId: photo.file_id,
+        timestamp: new Date((message.date || Date.now() / 1000) * 1000).toISOString()
+      });
+
+      // Limit to last 10 photos
+      if (photos.length >= 10) break;
     }
 
-    if (!latestPhotoFileId) {
-      return NextResponse.json(
-        { 
-          imageUrl: null,
-          message: 'No photos found in Telegram bot'
+    if (photos.length === 0) {
+      return NextResponse.json({ photos: [], message: 'No photos found' });
+    }
+
+    // Get download URLs for all found photos
+    const photoPromises = photos.map(async (p) => {
+      try {
+        const fileInfoUrl = `https://api.telegram.org/bot${botToken}/getFile?file_id=${p.fileId}`;
+        const fileInfoRes = await fetch(fileInfoUrl);
+        const fileInfo = await fileInfoRes.json();
+        
+        if (fileInfo.ok) {
+          return {
+            ...p,
+            imageUrl: `https://api.telegram.org/file/bot${botToken}/${fileInfo.result.file_path}`
+          };
         }
-      );
-    }
+        return null;
+      } catch {
+        return null;
+      }
+    });
 
-    // Get file info
-    const fileUrl = `https://api.telegram.org/bot${botToken}/getFile?file_id=${latestPhotoFileId}`;
-    const fileResponse = await fetch(fileUrl);
-    const fileData = await fileResponse.json();
-
-    if (!fileData.ok) {
-      return NextResponse.json(
-        { error: 'Failed to get file info from Telegram' },
-        { status: 500 }
-      );
-    }
-
-    // Generate download URL
-    const downloadUrl = `https://api.telegram.org/file/bot${botToken}/${fileData.result.file_path}`;
+    const enrichedPhotos = (await Promise.all(photoPromises)).filter(p => p !== null);
 
     return NextResponse.json({
-      imageUrl: downloadUrl,
-      fileId: latestPhotoFileId,
-      timestamp: new Date().toISOString()
+      photos: enrichedPhotos,
+      count: enrichedPhotos.length,
+      serverTime: new Date().toISOString()
     });
 
   } catch (error) {

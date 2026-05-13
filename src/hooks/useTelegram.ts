@@ -3,19 +3,17 @@
 import { useState, useEffect, useCallback } from 'react';
 
 interface TelegramPhoto {
-  imageUrl: string | null;
-  fileId?: string;
-  timestamp?: string;
-  message?: string;
-  error?: string;
+  imageUrl: string;
+  fileId: string;
+  timestamp: string;
 }
 
 export function useTelegramPhoto() {
-  const [data, setData] = useState<TelegramPhoto | null>(null);
+  const [photos, setPhotos] = useState<TelegramPhoto[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLatestPhoto = useCallback(async () => {
+  const fetchPhotos = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -23,13 +21,13 @@ export function useTelegramPhoto() {
       const result = await response.json();
       
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to fetch telegram photo');
+        throw new Error(result.error || 'Failed to fetch telegram photos');
       }
       
-      setData(result);
+      setPhotos(result.photos || []);
     } catch (err: any) {
       setError(err.message);
-      console.error('Error fetching Telegram photo:', err);
+      console.error('Error fetching Telegram photos:', err);
     } finally {
       setIsLoading(false);
     }
@@ -37,18 +35,17 @@ export function useTelegramPhoto() {
 
   // Initial fetch
   useEffect(() => {
-    fetchLatestPhoto();
+    fetchPhotos();
     
-    // Auto refresh every 30 seconds
-    const interval = setInterval(fetchLatestPhoto, 30000);
+    // Auto refresh every 45 seconds to avoid rate limits with many images
+    const interval = setInterval(fetchPhotos, 45000);
     return () => clearInterval(interval);
-  }, [fetchLatestPhoto]);
+  }, [fetchPhotos]);
 
   return { 
-    photo: data?.imageUrl || null, 
-    timestamp: data?.timestamp || null,
+    photos, 
     isLoading, 
     error,
-    refresh: fetchLatestPhoto 
+    refresh: fetchPhotos 
   };
 }

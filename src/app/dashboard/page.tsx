@@ -51,7 +51,7 @@ export default function DashboardPage() {
   const handleCapture = async (deviceId: string) => {
     setBusyTargetId(deviceId);
     try {
-      await sendCommand(deviceId, 'capture_photo');
+      await sendCommand(deviceId, 'take_photo');
     } finally {
       setBusyTargetId(null);
     }

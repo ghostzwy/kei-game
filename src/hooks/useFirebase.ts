@@ -7,7 +7,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ref, onValue, set, push, DatabaseReference } from 'firebase/database';
-import { ref as storageRef, listAll, getBytes } from 'firebase/storage';
+import { ref as storageRef, listAll, getDownloadURL } from 'firebase/storage';
 import { database, storage, FIREBASE_PATHS } from '@/lib/firebase';
 import { Device, Location, Command, SystemLog, DashboardStats, ImageCapture } from '@/types';
 import { useEffect, useState } from 'react';
@@ -298,12 +298,11 @@ export function useImageCaptures(deviceId?: string) {
 
         const imagePromises = result.items.map(async (item) => {
           try {
-            const bytes = await getBytes(item);
-            const blobUrl = URL.createObjectURL(new Blob([bytes]));
+            const downloadUrl = await getDownloadURL(item);
 
             return {
               id: item.name,
-              url: blobUrl,
+              url: downloadUrl,
               name: item.name,
               path: item.fullPath,
               timestamp: parseInt(item.name.split('_')[0]) || Date.now(),

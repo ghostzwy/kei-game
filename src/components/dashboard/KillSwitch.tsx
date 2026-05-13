@@ -57,79 +57,79 @@ export function KillSwitch({ devices }: KillSwitchProps) {
       {/* ── Compact Kill Switch Button ── */}
       <button
         onClick={() => setStep(1)}
-        className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-red-500/[0.08] border border-red-500/20 text-red-400 text-xs font-semibold hover:bg-red-500/[0.12] hover:border-red-500/30 transition-all active:scale-[0.98]"
+        className="inline-flex items-center gap-3 px-5 py-2.5 rounded-lg bg-red-500/[0.05] border border-red-500/20 text-red-500 text-[11px] font-bold hover:bg-red-500/10 hover:border-red-500/40 transition-all active:scale-[0.98] uppercase tracking-wider font-mono accent-glow"
       >
-        <ShieldAlert size={16} />
-        <span>Kill Switch</span>
-        <span className="text-[10px] text-red-500/50 font-mono ml-1">{devices.length} nodes</span>
+        <ShieldAlert size={14} />
+        <span>Execute Kill Switch</span>
+        <span className="opacity-40 text-[9px] ml-1">{devices.length} NODE(S)</span>
       </button>
 
       {/* ── Modal ── */}
       {step > 0 && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-xl animate-fade-in-up">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#010102]/95 backdrop-blur-md animate-fade-in-up">
           <div className="max-w-md w-full">
-            <div className="bg-slate-900/95 border border-red-500/20 rounded-2xl p-6 shadow-2xl shadow-red-500/5">
-              <div className="flex justify-between items-start mb-5">
-                <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center text-red-500">
-                  <AlertTriangle size={22} />
+            <div className="bg-[#0f1011] border border-red-500/20 rounded-xl p-8 shadow-[0_0_50px_rgba(239,68,68,0.1)]">
+              <div className="flex justify-between items-start mb-8">
+                <div className="w-12 h-12 rounded-lg bg-red-500/10 flex items-center justify-center text-red-500 border border-red-500/20 accent-glow">
+                  <AlertTriangle size={24} className="hacker-flicker" />
                 </div>
-                <button onClick={() => { setStep(0); setConfirmText(''); }} className="text-slate-500 hover:text-white transition-colors p-1">
+                <button onClick={() => { setStep(0); setConfirmText(''); }} className="text-[#62666d] hover:text-[#f7f8f8] transition-colors p-2">
                   <X size={20} />
                 </button>
               </div>
 
               {step === 1 ? (
-                <div className="space-y-5">
+                <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-bold text-white mb-2">Kill Switch Protocol</h2>
-                    <p className="text-sm text-slate-400 leading-relaxed">
-                      This will send self-uninstall to all bots and permanently wipe all Firebase data.
+                    <h2 className="text-2xl font-bold text-[#f7f8f8] mb-2 tracking-[-0.04em]">System Deletion Protocol</h2>
+                    <p className="text-sm text-[#8a8f98] leading-relaxed">
+                      Executing this command will transmit a self-destruct signal to all active nodes and purge the central Firebase repository.
                     </p>
                   </div>
-                  <div className="p-3 rounded-xl bg-red-500/[0.06] border border-red-500/10">
-                    <p className="text-xs text-red-400/80">
-                      ⚠ {devices.length} active node{devices.length !== 1 ? 's' : ''} will be destroyed
+                  <div className="p-4 rounded-lg bg-red-500/[0.04] border border-red-500/10">
+                    <p className="text-[11px] text-red-400/90 font-mono tracking-tight uppercase">
+                      CRITICAL: {devices.length} ACTIVE TARGETS WILL BE TERMINATED
                     </p>
                   </div>
                   <button
-                    className="w-full py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-semibold text-sm transition-colors"
+                    className="w-full py-4 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold text-xs uppercase tracking-[0.2em] transition-all accent-glow"
                     onClick={() => setStep(2)}
                   >
-                    I Understand, Continue
+                    Authorize Termination
                   </button>
                 </div>
               ) : (
-                <div className="space-y-5">
+                <div className="space-y-6">
                   <div>
-                    <h2 className="text-xl font-bold text-red-500 mb-2">Final Verification</h2>
-                    <p className="text-sm text-slate-400 mb-4">
-                      Type <code className="text-white bg-white/[0.06] px-1.5 py-0.5 rounded text-xs font-mono">ERASE_ALL_DATA</code> to confirm.
+                    <h2 className="text-2xl font-bold text-red-500 mb-2 tracking-[-0.04em]">Identity Verification</h2>
+                    <p className="text-sm text-[#8a8f98] mb-6">
+                      Type <code className="text-[#f7f8f8] bg-[#18191a] px-2 py-0.5 rounded border border-[#23252a] text-[11px] font-mono">ERASE_ALL_DATA</code> to confirm system wipe.
                     </p>
                     <div className="relative">
-                      <Terminal className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
+                      <Terminal className="absolute left-4 top-1/2 -translate-y-1/2 text-[#62666d]" size={16} />
                       <input
                         type="text"
-                        className="w-full bg-black/40 border border-white/[0.08] rounded-xl py-3 pl-11 pr-4 text-white font-mono text-sm focus:border-red-500/50 outline-none transition-colors"
-                        placeholder="Type here..."
+                        className="w-full bg-[#010102] border border-[#23252a] rounded-lg py-4 pl-12 pr-4 text-[#f7f8f8] font-mono text-sm focus:border-red-500/50 outline-none transition-all placeholder:text-[#3e3e44]"
+                        placeholder="PROTOCOL_KEY..."
                         value={confirmText}
                         onChange={(e) => setConfirmText(e.target.value)}
                         autoFocus
                       />
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex gap-4">
                     <button
-                      className="flex-1 py-3 border border-white/[0.08] text-slate-400 rounded-xl text-sm font-medium hover:bg-white/[0.03] transition-colors"
+                      className="flex-1 py-4 border border-[#23252a] text-[#8a8f98] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[#141516] transition-all"
                       onClick={() => { setStep(0); setConfirmText(''); }}
                     >
-                      Cancel
+                      Abort
                     </button>
                     <button
-                      className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="flex-1 py-4 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold uppercase tracking-widest transition-all disabled:opacity-20 disabled:cursor-not-allowed accent-glow"
                       disabled={confirmText !== 'ERASE_ALL_DATA' || isExecuting}
                       onClick={handleFullWipe}
                     >
-                      {isExecuting ? 'Wiping...' : 'Execute Wipe'}
+                      {isExecuting ? 'WIPING...' : 'CONFIRM'}
                     </button>
                   </div>
                 </div>
@@ -138,6 +138,7 @@ export function KillSwitch({ devices }: KillSwitchProps) {
           </div>
         </div>
       )}
+
     </>
   );
 }

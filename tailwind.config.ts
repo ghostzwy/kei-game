@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)'],
+        mono: ['var(--font-mono)'],
+      },
       colors: {
         'kei-dark': '#020617',
         'kei-card': '#1a1f2e',

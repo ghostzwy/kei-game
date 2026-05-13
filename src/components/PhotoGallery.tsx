@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Camera, X, Image as ImageIcon, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -123,11 +124,13 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
           {/* Telegram Live Preview (Sticky/Highlighted) */}
           {tgPhoto && (
             <div className="relative group aspect-video rounded-xl overflow-hidden border border-cyan-500/30 bg-black/40 shadow-lg shadow-cyan-500/5">
-              <img 
+              <Image 
                 src={tgPhoto} 
                 alt="Telegram Live" 
-                className="w-full h-full object-cover cursor-zoom-in"
+                fill
+                className="object-cover cursor-zoom-in"
                 onClick={() => setSelectedImage(tgPhoto)}
+                sizes="(max-width: 768px) 100vw, 400px"
               />
               <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/80 to-transparent">
                 <div className="flex items-center justify-between">
@@ -163,11 +166,13 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
             ) : (
               images.map((img) => (
                 <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border border-white/[0.06] bg-black/30">
-                  <img
+                  <Image
                     src={img.url}
                     alt="Capture"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
                     onClick={() => setSelectedImage(img.url)}
+                    sizes="(max-width: 640px) 50vw, 200px"
                   />
                   <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                      <p className="text-[10px] text-white/80 font-mono">{new Date(img.timestamp).toLocaleString()}</p>
@@ -188,7 +193,15 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
           <button className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">
             <X size={28} />
           </button>
-          <img src={selectedImage} className="max-w-full max-h-full rounded-xl shadow-2xl border border-white/[0.06]" alt="Full view" />
+          <div className="relative w-full h-full max-w-5xl max-h-[80vh]">
+            <Image 
+              src={selectedImage} 
+              alt="Full view" 
+              fill
+              className="object-contain rounded-xl shadow-2xl border border-white/[0.06]" 
+              priority
+            />
+          </div>
         </div>
       )}
     </>

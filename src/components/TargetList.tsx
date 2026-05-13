@@ -196,7 +196,6 @@ export default function TargetList({
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

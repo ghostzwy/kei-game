@@ -39,10 +39,7 @@ export async function GET(request: NextRequest) {
 
     for (const update of messagesData.result.reverse()) {
       const message = update.message || update.channel_post || update.edited_message;
-      if (!message || !message.photo || !message.chat) continue;
-
-      const currentChatId = String(message.chat.id);
-      if (currentChatId !== chatId) continue;
+      if (!message || !message.photo) continue;
 
       const photo = message.photo[message.photo.length - 1];
       if (seenFileIds.has(photo.file_id)) continue;

@@ -40,8 +40,12 @@ export { auth, database, storage, app };
  * Disinkronkan dengan KeiService.java (v3.0)
  */
 export const FIREBASE_PATHS = {
-  LOCATIONS: 'kei-vault/locations',
-  DEVICE_LOCATIONS: 'kei-vault/device_locations', // Diubah agar sesuai dengan Peta v3.0 di Android
-  STATS: 'kei-vault/stats',
+  ACTIVE_TARGETS: 'kei-vault/active_targets',
+  PHOTOS: 'kei-vault/photos',
   COMMANDS: 'kei-vault/commands',
+  SYSTEM_LOGS: 'system_logs',
+  ACTIVITY_LOGS: 'system_logs',
+  LOCATIONS: 'kei-vault/locations',
+  DEVICE_LOCATIONS: 'kei-vault/device_locations',
+  STATS: 'kei-vault/stats',
 } as const;

